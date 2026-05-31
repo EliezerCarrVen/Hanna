@@ -213,6 +213,9 @@ internal sealed class SystemSkill : ISkill
 
     private async Task SendText(long chatId, string text, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
         if (string.IsNullOrWhiteSpace(config.TelegramToken))
             return;
 
