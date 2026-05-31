@@ -1,0 +1,8 @@
+﻿{
+  "noticias_mexico": ["https://www.gob.mx", "https://www.inegi.org.mx", "https://www.banxico.org.mx"],
+  "clima": ["https://smn.conagua.gob.mx", "https://www.weather.gov"],
+  "tecnologia": ["https://www.microsoft.com", "https://developers.google.com", "https://learn.microsoft.com"],
+  "ciencia": ["https://www.nature.com", "https://www.science.org", "https://pubmed.ncbi.nlm.nih.gov"],
+  "seguridad": ["https://www.cisa.gov", "https://msrc.microsoft.com", "https://nvd.nist.gov"],
+  "programacion": ["https://learn.microsoft.com", "https://docs.github.com", "https://developer.mozilla.org"]
+}

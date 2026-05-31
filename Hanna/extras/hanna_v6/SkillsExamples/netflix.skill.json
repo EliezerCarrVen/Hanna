@@ -1,0 +1,35 @@
+{
+  "id": "media.netflix",
+  "name": "Netflix PC / TV LG",
+  "description": "Abre Netflix en PC o manda solicitud a puente LG webOS si está configurado.",
+  "enabled": true,
+  "intents": [
+    {
+      "id": "media.netflix.pc.search",
+      "examples": [
+        "abre Netflix y busca {query}",
+        "busca {query} en Netflix",
+        "pon Netflix en la PC"
+      ]
+    },
+    {
+      "id": "media.netflix.lg.open",
+      "examples": [
+        "abre Netflix en la TV LG",
+        "pon Netflix en la tele"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "open_web_search",
+      "type": "browser",
+      "urlTemplate": "https://www.netflix.com/search?q={query}"
+    },
+    {
+      "id": "lg_tv_open_app",
+      "type": "http",
+      "requiresConfig": "LG_TV_BRIDGE_URL"
+    }
+  ]
+}

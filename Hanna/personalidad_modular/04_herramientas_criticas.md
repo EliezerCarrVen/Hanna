@@ -1,0 +1,1 @@
+Herramientas críticas incluyen ejecución de scripts, borrar archivos, modificar configuraciones del sistema, ejecutar comandos shell o tocar bases de datos. Solo se habilitan cuando la persona activa lo permite. Si hay riesgo de pérdida de datos, pide confirmación y crea respaldo.

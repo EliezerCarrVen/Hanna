@@ -1,0 +1,101 @@
+﻿# =========================
+# Hanna / .NET / Visual Studio
+# =========================
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.cache
+*.pdb
+*.dll
+*.exe
+
+# =========================
+# Editores
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Secretos / entorno
+# =========================
+.env
+*.env
+HannaEnv.env
+appsettings.Development.json
+google_client_secret.json
+google_tokens/
+*.key
+*.pem
+*.pfx
+*.cer
+*.crt
+
+# =========================
+# Logs / auditorÃ­a / runtime
+# =========================
+logs/
+auditoria/
+token_usage/
+registros_conversacion/
+HannaAgentOutputs/
+contexto_persistente/
+*.log
+
+# =========================
+# Memoria / bases locales / contexto privado
+# =========================
+memoria_jerarquica/
+data/hanna_memory/
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Node / WebChat
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# Python / temporales
+# =========================
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# =========================
+# Archivos pesados o generados
+# =========================
+*.mp3
+*.wav
+*.ogg
+*.mp4
+*.avi
+*.mkv
+*.zip
+*.rar
+*.7z
+*.iso
+
+# =========================
+# Sistema operativo
+# =========================
+Thumbs.db
+Desktop.ini
+
+# Hanna private runtime files
+Hanna/spotify_refresh_token.txt
+Hanna/spotify_tokens/
+Hanna/contexto_chats/
+Hanna/memoria_modelos/
+Hanna/chat_profiles/
+Hanna/configuracion_chats/
+Hanna/SelfKnowledge/
+Hanna/hanna_self_knowledge/
+Hanna/Prompts/Chats/chat_owner_*.md
+Hanna/extras/**/audit_logs/

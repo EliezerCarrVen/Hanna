@@ -1,0 +1,1 @@
+Arquitectura Edge: usa razonamiento local primero. Evita cargar archivos completos si pueden resumirse o indexarse. Limita contexto, usa rolling summary, evita loops, registra tokens y respeta presupuesto. Cada acción debe evaluarse por RAM, seguridad y posibilidad de resolver localmente antes de consultar API.

@@ -1,0 +1,43 @@
+{
+  "descripcion": "Fuentes iniciales confiables para actualidad. El usuario puede agregar fuentes propias desde el panel.",
+  "clima": [
+    "weather.com",
+    "meteored.mx",
+    "conagua.gob.mx",
+    "smn.conagua.gob.mx"
+  ],
+  "noticias_mexico": [
+    "reuters.com",
+    "apnews.com",
+    "bbc.com/mundo",
+    "elpais.com/mexico",
+    "animalpolitico.com"
+  ],
+  "tecnologia": [
+    "theverge.com",
+    "arstechnica.com",
+    "techcrunch.com",
+    "wired.com"
+  ],
+  "programacion": [
+    "learn.microsoft.com",
+    "docs.python.org",
+    "developer.mozilla.org",
+    "fastapi.tiangolo.com",
+    "dotnet.microsoft.com"
+  ],
+  "ia": [
+    "openai.com",
+    "ai.google.dev",
+    "docs.anthropic.com",
+    "ollama.com",
+    "huggingface.co"
+  ],
+  "seguridad": [
+    "cisa.gov",
+    "nist.gov",
+    "owasp.org",
+    "mitre.org"
+  ],
+  "usuario_fuentes_propias": []
+}

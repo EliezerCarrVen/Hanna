@@ -1,0 +1,15 @@
+﻿Edita este archivo desde el panel web.
+Objetivo:
+- Guardar géneros, artistas, canciones y moods preferidos del dueño.
+- Hanna debe usar esto como contexto antes de buscar música en Spotify.
+Ejemplo:
+generos_favoritos:
+- corridos
+- reggaeton
+- rap
+artistas_favoritos:
+- 
+moods:
+- estudio:
+- noche:
+- gym:

@@ -1,0 +1,37 @@
+{
+  "defaultPhase": "local",
+  "phases": [
+    {
+      "id": "local",
+      "goal": "Resolver por comandos, intents, archivos locales o RAG antes del LLM."
+    },
+    {
+      "id": "estudio",
+      "goal": "Explicar, resumir, hacer preguntas y preparar quizzes."
+    },
+    {
+      "id": "programacion",
+      "goal": "Ayudar con código, SQL, depuración y generación de archivos."
+    },
+    {
+      "id": "ops",
+      "goal": "Administrar servicios, diagnósticos, logs y automatización."
+    },
+    {
+      "id": "multimedia",
+      "goal": "Spotify, YouTube, Netflix, TV LG y navegación multimedia."
+    },
+    {
+      "id": "ahorro",
+      "goal": "Reducir consumo de RAM, CPU, tokens y TTS."
+    },
+    {
+      "id": "nube",
+      "goal": "Usar APIs externas solo cuando sea necesario."
+    },
+    {
+      "id": "architect",
+      "goal": "Diseñar mejoras grandes sin romper el sistema."
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "strictRouting": true,
+  "allowCrossFallback": false,
+  "engines": [
+    {
+      "id": "ollama",
+      "name": "Ollama local",
+      "provider": "local",
+      "envKey": null,
+      "useWhen": "comandos offline, estudio, programación ligera"
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini directo",
+      "provider": "google",
+      "envKey": "GEMINI_API_KEY",
+      "useWhen": "respuestas rápidas usando tu API directa"
+    },
+    {
+      "id": "groq",
+      "name": "Groq directo",
+      "provider": "groq",
+      "envKey": "GROQ_API_KEY",
+      "useWhen": "respuestas rápidas en nube usando tu API directa"
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "provider": "openrouter",
+      "envKey": "OPENROUTER_API_KEY",
+      "useWhen": "solo cuando lo elijas explícitamente"
+    },
+    {
+      "id": "hybrid",
+      "name": "Híbrido",
+      "provider": "router",
+      "envKey": null,
+      "useWhen": "cuando Hanna deba decidir con reglas internas"
+    },
+    {
+      "id": "original",
+      "name": "Original",
+      "provider": "legacy",
+      "envKey": null,
+      "useWhen": "compatibilidad con el comportamiento anterior"
+    }
+  ],
+  "rules": [
+    "gemini nunca debe usar openrouter",
+    "groq nunca debe usar openrouter",
+    "openrouter solo se usa si el usuario lo pide o lo selecciona",
+    "ollama debe permanecer local",
+    "si falla un motor, avisar antes de cambiar"
+  ]
+}

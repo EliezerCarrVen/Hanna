@@ -1,0 +1,89 @@
+{
+  "host": "127.0.0.1",
+  "port": 8789,
+  "mobileApiBase": "http://127.0.0.1:8790",
+  "engineEndpoints": [
+    "/api/mobile/engine",
+    "/api/engine"
+  ],
+  "chatEndpoints": [
+    "/api/mobile/message"
+  ],
+  "stateEndpoints": [
+    "/api/mobile/state",
+    "/api/state"
+  ],
+  "timeoutMs": 60000,
+  "engines": [
+    {
+      "id": "ollama",
+      "label": "Ollama local",
+      "description": "Motor local recomendado para HP Mini."
+    },
+    {
+      "id": "gemini",
+      "label": "Gemini directo",
+      "description": "Usa GEMINI_API_KEY directa."
+    },
+    {
+      "id": "groq",
+      "label": "Groq directo",
+      "description": "Usa GROQ_API_KEY directa."
+    },
+    {
+      "id": "hybrid",
+      "label": "Híbrido",
+      "description": "Modo combinado controlado por Hanna."
+    },
+    {
+      "id": "openrouter",
+      "label": "OpenRouter",
+      "description": "Usa OPENROUTER_API_KEY solo si lo eliges."
+    },
+    {
+      "id": "original",
+      "label": "Original",
+      "description": "Motor original del proyecto."
+    }
+  ],
+  "phases": [
+    {
+      "id": "local",
+      "label": "Local / Offline"
+    },
+    {
+      "id": "estudio",
+      "label": "Estudio"
+    },
+    {
+      "id": "programacion",
+      "label": "Programación"
+    },
+    {
+      "id": "ops",
+      "label": "Operaciones"
+    },
+    {
+      "id": "multimedia",
+      "label": "Multimedia"
+    },
+    {
+      "id": "ahorro",
+      "label": "Ahorro"
+    },
+    {
+      "id": "nube",
+      "label": "Nube"
+    },
+    {
+      "id": "architect",
+      "label": "Arquitectura"
+    }
+  ],
+  "adminApiBase": "http://127.0.0.1:8787",
+  "phaseEndpoints": [
+    "/api/mobile/phase",
+    "/api/phase"
+  ],
+  "webchatVersion": "6.2-integrada-verificada"
+}

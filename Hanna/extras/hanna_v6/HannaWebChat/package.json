@@ -1,0 +1,11 @@
+{
+  "name": "hanna-webchat-v5",
+  "version": "5.0.0",
+  "private": true,
+  "description": "Chat online local para Hanna con selector de motores y fases. No usa dependencias npm externas.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "UNLICENSED"
+}

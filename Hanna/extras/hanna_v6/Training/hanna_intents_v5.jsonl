@@ -1,0 +1,14 @@
+{"intent":"engine.set.ollama","examples":["Hanna usa Ollama","cambia al motor local","ponte en local","usa el modelo local"],"action":"set_engine","params":{"engine":"ollama"}}
+{"intent":"engine.set.gemini","examples":["Hanna usa Gemini","usa mi API de Gemini","cambia a Gemini directo","responde con Gemini"],"action":"set_engine","params":{"engine":"gemini","strict":true}}
+{"intent":"engine.set.groq","examples":["Hanna usa Groq","cambia a Groq directo","usa mi API de Groq","responde con Groq"],"action":"set_engine","params":{"engine":"groq","strict":true}}
+{"intent":"engine.set.openrouter","examples":["Hanna usa OpenRouter","cambia a OpenRouter","ahora usa open routes","usa el router de modelos"],"action":"set_engine","params":{"engine":"openrouter","strict":true}}
+{"intent":"phase.local","examples":["fase local","modo offline","trabaja sin internet","resuelve localmente primero"],"action":"set_phase","params":{"phase":"local"}}
+{"intent":"phase.programming","examples":["fase programación","modo programador","ayúdame con código","necesito este código"],"action":"set_phase","params":{"phase":"programacion"}}
+{"intent":"media.netflix.pc.search","examples":["abre Netflix en la PC y busca Dark","busca Stranger Things en Netflix","abre Netflix y busca una serie","pon Netflix en el navegador"],"action":"open_web_search","params":{"platform":"netflix","device":"pc"}}
+{"intent":"media.netflix.lg.open","examples":["abre Netflix en la TV LG","pon Netflix en la tele","abre Netflix en mi LG","enciende Netflix en la televisión"],"action":"lg_tv_open_app","params":{"app":"netflix","requires_bridge":true}}
+{"intent":"system.status","examples":["estado del sistema","cómo está Hanna","revisa servicios","dime si está activa la API"],"action":"system_status","params":{}}
+{"intent":"feedback.positive","examples":["eso estuvo bien","así responde mejor","guarda esta forma de responder","me gustó esa respuesta"],"action":"save_feedback","params":{"rating":1}}
+{"intent":"feedback.negative","examples":["eso estuvo mal","te equivocaste","no uses ese motor para esto","corrige esa respuesta"],"action":"save_feedback","params":{"rating":-1}}
+{"intent":"name.wrong.dramatic","examples":["Alexa abre Spotify","Siri abre Netflix","Cortana qué hora es","Jarvis ayúdame"],"action":"dramatic_name_correction","params":{"expectedName":"Hanna","style":"dramatic_moderate"}}
+{"intent":"memory.save","examples":["recuerda esto","guarda esta información","añade esto a tu memoria","usa esto como contexto"],"action":"save_memory","params":{}}
+{"intent":"training.add.sample","examples":["agrega este comando al entrenamiento","aprende esta frase","entrena esta variación","guarda este ejemplo"],"action":"append_training_sample","params":{}}

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hanna Chat Online V6.2</title>
+  <style>
+    :root { --bg:#101114; --panel:#191b20; --panel2:#22252c; --text:#f4f4f5; --muted:#a8adb7; --line:#30343d; --accent:#8fd3ff; --bad:#ff9b9b; --ok:#a7f3d0; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Segoe UI, Arial, sans-serif; background:var(--bg); color:var(--text); }
+    header { padding:18px 22px; border-bottom:1px solid var(--line); background:linear-gradient(120deg,#151820,#20242d); }
+    header h1 { margin:0; font-size:22px; }
+    header p { margin:6px 0 0; color:var(--muted); font-size:14px; }
+    main { display:grid; grid-template-columns: 320px 1fr; gap:16px; padding:16px; height:calc(100vh - 80px); }
+    aside, section { background:var(--panel); border:1px solid var(--line); border-radius:18px; overflow:hidden; }
+    aside { padding:16px; }
+    label { display:block; color:var(--muted); font-size:12px; margin:12px 0 6px; }
+    input, select, textarea, button { width:100%; border-radius:12px; border:1px solid var(--line); background:var(--panel2); color:var(--text); padding:10px; font-size:14px; }
+    button { cursor:pointer; background:#263141; border-color:#3b4a60; }
+    button:hover { filter:brightness(1.15); }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .quick { display:grid; gap:8px; margin-top:12px; }
+    .status { margin-top:12px; padding:10px; border-radius:12px; background:#11151c; color:var(--muted); font-size:12px; white-space:pre-wrap; }
+    .chat { display:flex; flex-direction:column; height:100%; }
+    .messages { flex:1; overflow:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+    .msg { max-width:82%; padding:12px 14px; border-radius:16px; line-height:1.35; white-space:pre-wrap; }
+    .user { align-self:flex-end; background:#1f3b55; }
+    .bot { align-self:flex-start; background:#252831; }
+    .sys { align-self:center; background:#11151c; color:var(--muted); font-size:12px; max-width:95%; }
+    .composer { display:grid; grid-template-columns: 1fr 120px; gap:10px; border-top:1px solid var(--line); padding:12px; }
+    textarea { resize:none; min-height:48px; max-height:120px; }
+    small { color:var(--muted); display:block; margin-top:6px; line-height:1.35; }
+    @media (max-width:800px) { main { grid-template-columns:1fr; height:auto; } section { height:70vh; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hanna Chat Online V6.2</h1>
+    <p>Chat local integrado con motores reales, fases activas y perfil HP Mini 110.</p>
+  </header>
+  <main>
+    <aside>
+      <label>Chat ID</label>
+      <input id="chatId" placeholder="Tu ID de Telegram o usuario local" />
+      <label>Pairing token</label>
+      <input id="token" placeholder="HANNA_MOBILE_API_PAIRING_TOKEN" type="password" />
+      <div class="row">
+        <div>
+          <label>Motor</label>
+          <select id="engine"></select>
+        </div>
+        <div>
+          <label>Fase</label>
+          <select id="phase"></select>
+        </div>
+      </div>
+      <button id="save">Guardar conexión</button>
+      <small>Los datos se guardan solo en este navegador con localStorage.</small>
+      <div class="quick">
+        <button data-msg="Hanna usa Ollama">Usar Ollama</button>
+        <button data-msg="Hanna usa Gemini">Usar Gemini directo</button>
+        <button data-msg="Hanna usa Groq">Usar Groq directo</button>
+        <button data-msg="Hanna usa OpenRouter">Usar OpenRouter</button>
+        <button data-msg="Hanna estado del sistema">Estado del sistema</button>
+        <button data-msg="Hanna abre Netflix en la PC y busca Dark">Netflix: buscar serie</button>
+      </div>
+      <div class="status" id="status">Cargando configuración...</div>
+    </aside>
+    <section class="chat">
+      <div id="messages" class="messages"></div>
+      <div class="composer">
+        <textarea id="message" placeholder="Escribe o pega tu comando para Hanna..."></textarea>
+        <button id="send">Enviar</button>
+      </div>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const messages = $('messages');
+    function addMsg(text, cls) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + cls;
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+    function getSettings() {
+      return {
+        chatId: $('chatId').value.trim(),
+        pairingToken: $('token').value.trim(),
+        engine: $('engine').value,
+        phase: $('phase').value
+      };
+    }
+    function saveSettings() {
+      localStorage.setItem('hanna_v62_chat', JSON.stringify(getSettings()));
+      $('status').textContent = 'Conexión guardada. Motor: ' + $('engine').value + ' | Fase: ' + $('phase').value;
+    }
+    async function loadConfig() {
+      const res = await fetch('/api/config');
+      const cfg = await res.json();
+      $('engine').innerHTML = cfg.engines.map(e => `<option value="${e.id}">${e.label}</option>`).join('');
+      $('phase').innerHTML = cfg.phases.map(p => `<option value="${p.id}">${p.label}</option>`).join('');
+      const saved = JSON.parse(localStorage.getItem('hanna_v62_chat') || '{}');
+      if (saved.chatId) $('chatId').value = saved.chatId;
+      if (saved.pairingToken) $('token').value = saved.pairingToken;
+      if (saved.engine) $('engine').value = saved.engine;
+      if (saved.phase) $('phase').value = saved.phase;
+      $('status').textContent = 'API móvil: ' + cfg.mobileApiBase + '\nListo para conectar.';
+      addMsg('Chat online listo. Verifica que Hanna esté corriendo y que la API móvil esté activa en 8790.', 'sys');
+    }
+    async function sendMessage(text) {
+      const msg = (text || $('message').value).trim();
+      if (!msg) return;
+      $('message').value = '';
+      addMsg(msg, 'user');
+      const payload = { ...getSettings(), message: msg };
+      try {
+        const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        const data = await res.json();
+        const content = data?.result?.data?.response || data?.result?.data?.message || data?.result?.data?.text || data?.result?.data || data;
+        addMsg(typeof content === 'string' ? content : JSON.stringify(content, null, 2), res.ok ? 'bot' : 'sys');
+      } catch (err) {
+        addMsg('Error: ' + err.message, 'sys');
+      }
+    }
+    $('save').addEventListener('click', saveSettings);
+    $('send').addEventListener('click', () => sendMessage());
+    $('message').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    $('engine').addEventListener('change', async () => {
+      saveSettings();
+      try {
+        await fetch('/api/set-engine', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ engine: $('engine').value, pairingToken: $('token').value.trim() }) });
+      } catch (_) {}
+    });
+    $('phase').addEventListener('change', async () => {
+      saveSettings();
+      try {
+        await fetch('/api/set-phase', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phase: $('phase').value, pairingToken: $('token').value.trim() }) });
+      } catch (_) {}
+    });
+    document.querySelectorAll('[data-msg]').forEach(btn => btn.addEventListener('click', () => sendMessage(btn.dataset.msg)));
+    loadConfig().catch(err => $('status').textContent = 'Error cargando configuración: ' + err.message);
+  </script>
+</body>
+</html>

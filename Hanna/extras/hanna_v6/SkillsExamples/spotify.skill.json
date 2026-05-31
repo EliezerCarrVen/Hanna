@@ -1,0 +1,28 @@
+{
+  "id": "media.spotify.smartplay",
+  "name": "Spotify Smart Play",
+  "description": "Antes de reproducir, compara texto solicitado contra playlists, favoritos y canciones conocidas.",
+  "enabled": true,
+  "intents": [
+    {
+      "id": "media.spotify.play.smart",
+      "examples": [
+        "reproduce mi playlist {query}",
+        "pon música de {query}",
+        "busca {query} en Spotify"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "spotify_resolve_before_play",
+      "type": "internal",
+      "steps": [
+        "read_user_playlists",
+        "read_saved_tracks_if_available",
+        "fuzzy_match",
+        "confirm_or_play"
+      ]
+    }
+  ]
+}

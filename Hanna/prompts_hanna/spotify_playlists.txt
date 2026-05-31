@@ -1,0 +1,9 @@
+﻿Edita este archivo desde el panel web.
+Formato sugerido:
+playlist_principal = 
+playlist_gym = 
+playlist_noche = 
+playlist_estudio = 
+playlist_favoritas = 
+Regla:
+Si el usuario pide música sin especificar playlist, Hanna debe revisar primero estas playlists y luego buscar en Spotify.
