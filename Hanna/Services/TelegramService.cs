@@ -72,10 +72,7 @@ internal sealed partial class TelegramService
         }
 
         if (string.IsNullOrWhiteSpace(config.GroqApiKey))
-        {
-            Console.WriteLine("[Telegram] Falta GROQ_API_KEY. Telegram queda desactivado para evitar fallos en transcripción.");
-            return;
-        }
+            Console.WriteLine("[Telegram] GROQ_API_KEY no configurada. Telegram iniciará en modo texto; los audios se rechazarán hasta configurar Groq.");
 
         try
         {
@@ -138,6 +135,12 @@ internal sealed partial class TelegramService
         {
             if (message.Voice != null)
             {
+                if (string.IsNullOrWhiteSpace(config.GroqApiKey))
+                {
+                    await response.Send(botClient, chatId, "No puedo procesar audios todavía porque falta GROQ_API_KEY. Telegram sigue disponible para mensajes de texto.", cancellationToken, true);
+                    return;
+                }
+
                 await SendTextHttp(chatId, "Estoy escuchando tu audio...", cancellationToken);
 
                 string? filePath = await GetFilePath(message.Voice.FileId, cancellationToken);
@@ -232,7 +235,7 @@ internal sealed partial class TelegramService
 
             if (!skillResult.Handled || (!skillResult.SkipResponse && string.IsNullOrWhiteSpace(skillResult.ResponseText)))
             {
-                skillResult = SkillResult.Text("Te leÃ­, pero el motor no generÃ³ respuesta. Ya forcÃ© modo local con Ollama; intenta de nuevo o revisa la consola de Ollama.");
+                skillResult = SkillResult.Text("Te leí, pero el motor no generó respuesta. Ya forcé modo local con Ollama; intenta de nuevo o revisa la consola de Ollama.");
             }
 
             if (!skillResult.Handled)
@@ -522,6 +525,9 @@ internal sealed partial class TelegramService
 
     private async Task SendTextHttp(long chatId, string text, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
         if (string.IsNullOrWhiteSpace(config.TelegramToken))
             return;
 
