@@ -4,6 +4,7 @@ public sealed class AppConfig
 {
     public string BaseDirectory { get; init; } = "";
     public string EnvPath { get; init; } = "";
+    public string HannaMode { get; init; } = "full";
     public string PersonalityPath { get; init; } = "";
     public string TelegramToken { get; init; } = "";
     public string GroqApiKey { get; init; } = "";
@@ -195,6 +196,7 @@ public sealed class AppConfig
         {
             BaseDirectory = baseDir,
             EnvPath = envPath,
+            HannaMode = EnvString("HANNA_MODE", "full"),
             PersonalityPath = Path.Combine(baseDir, "personalidad.txt"),
             TelegramToken = EnvString("TELEGRAM_TOKEN", ""),
             GroqApiKey = EnvString("GROQ_API_KEY", ""),

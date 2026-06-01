@@ -16,7 +16,6 @@ internal class Program
         var config = AppConfig.Load();
         var runtimeSettings = new RuntimeSettingsService(config);
         using var ollamaDaemon = new OllamaDaemonService(config);
-        await ollamaDaemon.EnsureRunningAsync(CancellationToken.None);
 
         var httpClient = new HttpClient();
         var mongoLogs = new MongoLogService(config);
@@ -39,12 +38,17 @@ internal class Program
         var ollama = new OllamaService(config, new HttpClient(), runtimeSettings);
         var openRouter = new OpenRouterService(config, new HttpClient(), queryAnalyzer, personaService, tokenEstimator, tokenLedger);
         var modelMode = new ModelModeService(config, storage);
+        var startupProfile = StartupProfile.Resolve(config, runtimeSettings.Snapshot(), modelMode.GetMode());
+        startupProfile.PrintPlan();
+
+        if (startupProfile.DecideOllama().Enabled)
+            await SafeStartAsync("Ollama", () => ollamaDaemon.EnsureRunningAsync(CancellationToken.None));
+
         var phaseService = new PhaseService(config);
         var tieredMemory = new TieredMemoryService(config);
         var audit = new AuditTrailService(config);
         var nightlyMaintenance = new NightlyMaintenanceService(config, tieredMemory, audit);
         var authorization = new CommandAuthorizationService(config);
-        var webChat = new WebChatHostService(config);
         var orchestrator = new ModelOrchestrator(mongoLogs, config, context, groq, gemini, ollama, openRouter, modelMode, tokenLedger, personaService);
         var tts = new TtsService(config, runtimeSettings);
         var response = new ResponseService(config, storage, tts);
@@ -87,8 +91,11 @@ internal class Program
         var googleIntegration = new GoogleIntegrationService(config);
         var dynamicSkills = new DynamicSkillService(config, runtimeSettings, codeOutput, appLauncher, browser, courseNotebooks);
         var assignmentService = new AssignmentService(config, runtimeSettings, mirror, courseNotebooks);
-        SafeStart("Tareas", () => assignmentService.Start());
-        SafeStart("Mantenimiento nocturno", () => nightlyMaintenance.Start());
+        if (startupProfile.DecideAssignments().Enabled)
+            SafeStart("Tareas", () => assignmentService.Start());
+
+        if (startupProfile.DecideNightlyMaintenance().Enabled)
+            SafeStart("Mantenimiento nocturno", () => nightlyMaintenance.Start());
 
         var intentRouter = new IntentRouter();
 
@@ -123,7 +130,7 @@ internal class Program
         var skillRouter = new SkillRouter(intentRouter, skills, audit);
         Console.WriteLine("[Arranque] Skills cargadas: " + skills.Count + ". Preparando voz, hotkeys, API y panel...");
         var telegram = new TelegramService(config, logs, context, response, skillRouter, groq, vision, mongoLogs, modelMode, contextArchive);
-        TelegramBotClient? localBotClient = string.IsNullOrWhiteSpace(config.TelegramToken) ? null : new TelegramBotClient(config.TelegramToken);
+        TelegramBotClient? localBotClient = TryCreateTelegramBotClient(config.TelegramToken, startupProfile.DecideTelegram());
 
         MicrophoneRecorderService? microphoneRecorder = null;
         GlobalHotkeyService? globalHotkey = null;
@@ -131,7 +138,7 @@ internal class Program
 
         try
         {
-            if (config.LocalHotkeyEnabled && localBotClient != null)
+            if (startupProfile.DecideHotkeys().Enabled && localBotClient != null)
             {
                 microphoneRecorder = new MicrophoneRecorderService();
 
@@ -165,7 +172,7 @@ internal class Program
                     localBotClient,
                     runtimeSettings);
 
-                globalHotkey = new GlobalHotkeyService(new[]
+                var hotkeyBindings = new List<HotkeyBinding>
                 {
                     new HotkeyBinding(
                         8301,
@@ -179,27 +186,34 @@ internal class Program
                         GlobalHotkeyService.ModControl | GlobalHotkeyService.ModAlt,
                         GlobalHotkeyService.VkEnter,
                         "AltGr+Enter / Ctrl+Alt+Enter - voz local con ventana",
-                        () => voiceCommand.ListenOnceAsync(showOverlay: true, CancellationToken.None)),
+                        () => voiceCommand.ListenOnceAsync(showOverlay: startupProfile.DecideOverlay().Enabled, CancellationToken.None)),
 
                     new HotkeyBinding(
                         8303,
                         GlobalHotkeyService.ModControl | GlobalHotkeyService.ModAlt | GlobalHotkeyService.ModShift,
                         GlobalHotkeyService.VkH,
                         "AltGr+Shift+H / Ctrl+Alt+Shift+H - voz local con ventana",
-                        () => voiceCommand.ListenOnceAsync(showOverlay: true, CancellationToken.None)),
+                        () => voiceCommand.ListenOnceAsync(showOverlay: startupProfile.DecideOverlay().Enabled, CancellationToken.None)),
+                };
 
-                    new HotkeyBinding(
+                if (startupProfile.DecideScreenAnalysis().Enabled)
+                {
+                    hotkeyBindings.Add(new HotkeyBinding(
                         8304,
                         0,
                         GlobalHotkeyService.VkF9,
                         "F9 - analizar pantalla y generar código si aplica",
-                        () => screenAgent.AnalyzeScreenAsync(CancellationToken.None)),
-                });
+                        () => screenAgent.AnalyzeScreenAsync(CancellationToken.None)));
+                }
 
+                globalHotkey = new GlobalHotkeyService(hotkeyBindings);
                 globalHotkey.Start();
 
-                wakeWord = new WakeWordService(config, runtimeSettings, groq, voiceCommand);
-                wakeWord.Start();
+                if (startupProfile.DecideWakeWord().Enabled)
+                {
+                    wakeWord = new WakeWordService(config, runtimeSettings, groq, voiceCommand);
+                    wakeWord.Start();
+                }
             }
         }
         catch (Exception ex)
@@ -208,27 +222,37 @@ internal class Program
         }
 
         MobileApiServerService? mobileApi = null;
-        if (localBotClient != null)
+        if (startupProfile.DecideMobileApi().Enabled && localBotClient != null)
         {
             mobileApi = new MobileApiServerService(config, runtimeSettings, skillRouter, localBotClient, modelMode, phaseService, tieredMemory, audit, authorization);
             await SafeStartAsync("Mobile API", () => mobileApi.StartAsync(CancellationToken.None));
         }
 
-        var adminWeb = new AdminWebServerService(
-            config,
-            runtimeSettings,
-            modelMode,
-            personality,
-            localAudio,
-            webcamLed,
-            ollamaDaemon,
-            dynamicSkills,
-            assignmentService,
-            courseNotebooks,
-            developerTools,
-            googleIntegration);
-        await SafeStartAsync("Admin Web", () => adminWeb.StartAsync(CancellationToken.None));
-        SafeStart("WebChat standalone opcional", () => webChat.Start());
+        AdminWebServerService? adminWeb = null;
+        if (startupProfile.DecideAdminWeb().Enabled)
+        {
+            adminWeb = new AdminWebServerService(
+                config,
+                runtimeSettings,
+                modelMode,
+                personality,
+                localAudio,
+                webcamLed,
+                ollamaDaemon,
+                dynamicSkills,
+                assignmentService,
+                courseNotebooks,
+                developerTools,
+                googleIntegration);
+            await SafeStartAsync("Admin Web", () => adminWeb.StartAsync(CancellationToken.None));
+        }
+
+        WebChatHostService? webChat = null;
+        if (startupProfile.DecideWebChat().Enabled)
+        {
+            webChat = new WebChatHostService(config);
+            SafeStart("WebChat standalone opcional", () => webChat.Start());
+        }
 
         await logs.RegisterSystem("Hanna inició una nueva sesión modular.");
 
@@ -254,10 +278,11 @@ internal class Program
         Console.WriteLine("Cámara: puedes decir 'enciende cámara', 'apaga cámara', 'activa indicador de cámara' o 'desactiva indicador de cámara'.");
         Console.WriteLine("Spotify extra: fila, playlists, rutinas y preferencias activadas.");
 
-        await SafeStartAsync("Telegram", () => telegram.StartAsync());
+        if (startupProfile.DecideTelegram().Enabled)
+            await SafeStartAsync("Telegram", () => telegram.StartAsync());
 
         RuntimeSettings startupSettings = runtimeSettings.Snapshot();
-        if (startupSettings.StartupGreetingEnabled)
+        if (startupProfile.DecideStartupLocalGreeting().Enabled)
         {
             await mirror.MirrorSystem(startupSettings.StartupGreetingText, CancellationToken.None);
             await localAudio.Speak(startupSettings.StartupGreetingText, CancellationToken.None);
@@ -265,8 +290,8 @@ internal class Program
 
         Console.ReadLine();
 
-        webChat.Dispose();
-        adminWeb.Dispose();
+        webChat?.Dispose();
+        adminWeb?.Dispose();
         globalHotkey?.Dispose();
         wakeWord?.Dispose();
         mobileApi?.Dispose();
@@ -276,6 +301,23 @@ internal class Program
         webcamLed.Dispose();
 
         await logs.RegisterSystem("Hanna cerró desde consola.");
+    }
+
+
+    private static TelegramBotClient? TryCreateTelegramBotClient(string token, StartupDecision decision)
+    {
+        if (!decision.Enabled)
+            return null;
+
+        try
+        {
+            return new TelegramBotClient(token);
+        }
+        catch (Exception ex) when (ex is ArgumentException or FormatException)
+        {
+            Console.WriteLine("[Arranque] TelegramBotClient omitido por credenciales: " + ex.Message);
+            return null;
+        }
     }
 
     private static void SafeStart(string name, Action action)
