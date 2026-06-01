@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+﻿import { useRef, useState } from 'react';
 import { hannaClient } from '../api/hannaClient';
 import type { ChatMessage, HannaLogEvent, HannaStatus, PendingFile } from '../types/hanna';
 import { FileDropzone } from './FileDropzone';
@@ -15,7 +15,7 @@ function createMessage(role: ChatMessage['role'], text: string, localOnly = fals
 
 export function ChatPanel({ status, onLog }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    createMessage('system', 'Chat operativo de Hanna listo. Si el backend está desconectado, los mensajes quedan solo en modo visual.', true)
+    createMessage('system', 'Chat operativo de Hanna listo. Si el backend estÃ¡ desconectado, los mensajes quedan solo en modo visual.', true)
   ]);
   const [text, setText] = useState('');
   const [files, setFiles] = useState<PendingFile[]>([]);
@@ -37,7 +37,7 @@ export function ChatPanel({ status, onLog }: Props) {
     setSending(true);
 
     if (status.mode !== 'connected') {
-      const offline = 'Backend desconectado. No se envió a Hanna real.';
+      const offline = 'Backend desconectado. No se enviÃ³ a Hanna real.';
       setMessages((current) => [...current, createMessage('system', offline, true)]);
       onLog(hannaClient.createLocalLog(offline, 'warn'));
       setSending(false);
@@ -46,12 +46,12 @@ export function ChatPanel({ status, onLog }: Props) {
 
     const result = await hannaClient.sendChatMessage(outgoingText, files.map((item) => item.file));
     if (result.ok && result.response) {
-      setMessages((current) => [...current, createMessage('assistant', result.response)]);
+      setMessages((current) => [...current, createMessage('assistant', result.response ?? 'Backend desconectado. No se recibió respuesta de Hanna real.')]);
       onLog(hannaClient.createLocalLog('Mensaje enviado al backend.', 'info'));
     } else {
       const fallback = result.preparedOnly
-        ? 'Función preparada, no implementada en backend estable.'
-        : 'Backend desconectado. No se envió a Hanna real.';
+        ? 'FunciÃ³n preparada, no implementada en backend estable.'
+        : 'Backend desconectado. No se enviÃ³ a Hanna real.';
       setMessages((current) => [...current, createMessage('system', result.error || fallback, true)]);
       onLog(hannaClient.createLocalLog(result.error || fallback, result.offline ? 'warn' : 'info'));
     }
@@ -64,7 +64,7 @@ export function ChatPanel({ status, onLog }: Props) {
       <div className="chat-header">
         <div>
           <h1>Chat online</h1>
-          <p>{status.mode === 'connected' ? 'Conectado a Hanna.' : 'Backend no conectado. El mensaje queda en modo visual y no se envía a Hanna real.'}</p>
+          <p>{status.mode === 'connected' ? 'Conectado a Hanna.' : 'Backend no conectado. El mensaje queda en modo visual y no se envÃ­a a Hanna real.'}</p>
         </div>
         <span className={`status-chip ${status.mode}`}>{status.backend}</span>
       </div>
@@ -93,3 +93,4 @@ export function ChatPanel({ status, onLog }: Props) {
     </main>
   );
 }
+
