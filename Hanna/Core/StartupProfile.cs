@@ -1,4 +1,4 @@
-using Hanna.Models;
+﻿using Hanna.Models;
 using Hanna.Services;
 
 namespace Hanna.Core;
@@ -33,7 +33,7 @@ internal sealed class StartupProfile
     public StartupDecision DecideOllama()
     {
         if (config.OllamaAutoStart || activeEngine == EngineMode.OllamaLocal)
-            return StartupDecision.Enabled("OLLAMA_AUTO_START=true o motor activo requiere Ollama.");
+            return StartupDecision.Start("OLLAMA_AUTO_START=true o motor activo requiere Ollama.");
 
         return StartupDecision.Config("OLLAMA_AUTO_START=false y el motor activo no es Ollama.");
     }
@@ -41,9 +41,9 @@ internal sealed class StartupProfile
     public StartupDecision DecideTelegram()
     {
         if (!IsValidTelegramToken(config.TelegramToken))
-            return StartupDecision.Credentials("TELEGRAM_TOKEN vacío, placeholder o con formato inválido.");
+            return StartupDecision.Credentials("TELEGRAM_TOKEN vacÃ­o, placeholder o con formato invÃ¡lido.");
 
-        return StartupDecision.Enabled("TELEGRAM_TOKEN válido.");
+        return StartupDecision.Start("TELEGRAM_TOKEN vÃ¡lido.");
     }
 
     public StartupDecision DecideAdminWeb()
@@ -54,7 +54,7 @@ internal sealed class StartupProfile
         if (!config.AdminWebEnabled || !settings.AdminWebEnabled)
             return StartupDecision.Config("HANNA_ADMIN_WEB_ENABLED=false o desactivado en runtime_settings.json.");
 
-        return StartupDecision.Enabled("Perfil permite Admin Web y HANNA_ADMIN_WEB_ENABLED=true.");
+        return StartupDecision.Start("Perfil permite Admin Web y HANNA_ADMIN_WEB_ENABLED=true.");
     }
 
     public StartupDecision DecideWebChat()
@@ -68,7 +68,7 @@ internal sealed class StartupProfile
         if (IsHybrid && !webChatExplicitlyEnabled)
             return StartupDecision.Profile("HANNA_MODE=hybrid desactiva WebChat standalone por defecto; usa HANNA_WEBCHAT_ENABLED=true para activarlo.");
 
-        return StartupDecision.Enabled("Perfil permite WebChat standalone y HANNA_WEBCHAT_ENABLED=true.");
+        return StartupDecision.Start("Perfil permite WebChat standalone y HANNA_WEBCHAT_ENABLED=true.");
     }
 
     public StartupDecision DecideMobileApi()
@@ -80,9 +80,9 @@ internal sealed class StartupProfile
             return StartupDecision.Config("HANNA_MOBILE_API_ENABLED=false o desactivado en runtime_settings.json.");
 
         if (!IsValidTelegramToken(config.TelegramToken))
-            return StartupDecision.Credentials("Mobile API requiere TelegramBotClient y TELEGRAM_TOKEN válido en la arquitectura actual.");
+            return StartupDecision.Credentials("Mobile API requiere TelegramBotClient y TELEGRAM_TOKEN vÃ¡lido en la arquitectura actual.");
 
-        return StartupDecision.Enabled("Perfil permite Mobile API y HANNA_MOBILE_API_ENABLED=true.");
+        return StartupDecision.Start("Perfil permite Mobile API y HANNA_MOBILE_API_ENABLED=true.");
     }
 
     public StartupDecision DecideHotkeys()
@@ -94,9 +94,9 @@ internal sealed class StartupProfile
             return StartupDecision.Config("HANNA_LOCAL_HOTKEY_ENABLED=false o desactivado en runtime_settings.json.");
 
         if (!IsValidTelegramToken(config.TelegramToken))
-            return StartupDecision.Credentials("Las hotkeys locales usan TelegramBotClient en la arquitectura actual; falta TELEGRAM_TOKEN válido.");
+            return StartupDecision.Credentials("Las hotkeys locales usan TelegramBotClient en la arquitectura actual; falta TELEGRAM_TOKEN vÃ¡lido.");
 
-        return StartupDecision.Enabled("Perfil permite hotkeys y HANNA_LOCAL_HOTKEY_ENABLED=true.");
+        return StartupDecision.Start("Perfil permite hotkeys y HANNA_LOCAL_HOTKEY_ENABLED=true.");
     }
 
     public StartupDecision DecideOverlay()
@@ -107,18 +107,18 @@ internal sealed class StartupProfile
         if (!config.OverlayEnabled || !settings.OverlayEnabled)
             return StartupDecision.Config("HANNA_OVERLAY_ENABLED=false o desactivado en runtime_settings.json.");
 
-        return StartupDecision.Enabled("Perfil permite overlay y HANNA_OVERLAY_ENABLED=true.");
+        return StartupDecision.Start("Perfil permite overlay y HANNA_OVERLAY_ENABLED=true.");
     }
 
     public StartupDecision DecideScreenAnalysis()
     {
         if (IsTelegramOnly)
-            return StartupDecision.Profile("HANNA_MODE=telegram_only no inicia análisis de pantalla.");
+            return StartupDecision.Profile("HANNA_MODE=telegram_only no inicia anÃ¡lisis de pantalla.");
 
         if (!config.ScreenAnalysisEnabled || !settings.ScreenAnalysisEnabled)
             return StartupDecision.Config("HANNA_SCREEN_ANALYSIS_ENABLED=false o desactivado en runtime_settings.json.");
 
-        return StartupDecision.Enabled("Perfil permite análisis de pantalla y HANNA_SCREEN_ANALYSIS_ENABLED=true.");
+        return StartupDecision.Start("Perfil permite anÃ¡lisis de pantalla y HANNA_SCREEN_ANALYSIS_ENABLED=true.");
     }
 
     public StartupDecision DecideWakeWord()
@@ -132,7 +132,7 @@ internal sealed class StartupProfile
         if (string.IsNullOrWhiteSpace(config.GroqApiKey))
             return StartupDecision.Credentials("Wake word requiere GROQ_API_KEY para transcribir audio.");
 
-        return StartupDecision.Enabled("Perfil permite wake word y HANNA_WAKE_WORD_ENABLED=true.");
+        return StartupDecision.Start("Perfil permite wake word y HANNA_WAKE_WORD_ENABLED=true.");
     }
 
     public StartupDecision DecideAssignments()
@@ -143,7 +143,7 @@ internal sealed class StartupProfile
         if (!config.AssignmentsEnabled || !settings.AssignmentsEnabled)
             return StartupDecision.Config("HANNA_ASSIGNMENTS_ENABLED=false o desactivado en runtime_settings.json.");
 
-        return StartupDecision.Enabled("Perfil permite tareas y HANNA_ASSIGNMENTS_ENABLED=true.");
+        return StartupDecision.Start("Perfil permite tareas y HANNA_ASSIGNMENTS_ENABLED=true.");
     }
 
     public StartupDecision DecideNightlyMaintenance()
@@ -154,7 +154,7 @@ internal sealed class StartupProfile
         if (!config.NightlyMaintenanceEnabled)
             return StartupDecision.Config("HANNA_NIGHTLY_MAINTENANCE_ENABLED=false.");
 
-        return StartupDecision.Enabled("Perfil permite mantenimiento y HANNA_NIGHTLY_MAINTENANCE_ENABLED=true.");
+        return StartupDecision.Start("Perfil permite mantenimiento y HANNA_NIGHTLY_MAINTENANCE_ENABLED=true.");
     }
 
     public StartupDecision DecideStartupLocalGreeting()
@@ -165,7 +165,7 @@ internal sealed class StartupProfile
         if (!settings.StartupGreetingEnabled)
             return StartupDecision.Config("HANNA_STARTUP_GREETING_ENABLED=false o desactivado en runtime_settings.json.");
 
-        return StartupDecision.Enabled("Saludo local de arranque habilitado.");
+        return StartupDecision.Start("Saludo local de arranque habilitado.");
     }
 
     public IReadOnlyList<(string Name, StartupDecision Decision)> BuildPlan()
@@ -179,7 +179,7 @@ internal sealed class StartupProfile
             ("Mobile API", DecideMobileApi()),
             ("Hotkeys locales", DecideHotkeys()),
             ("Overlay", DecideOverlay()),
-            ("Análisis de pantalla", DecideScreenAnalysis()),
+            ("AnÃ¡lisis de pantalla", DecideScreenAnalysis()),
             ("Wake word", DecideWakeWord()),
             ("Tareas", DecideAssignments()),
             ("Mantenimiento nocturno", DecideNightlyMaintenance()),
@@ -192,7 +192,7 @@ internal sealed class StartupProfile
         Console.WriteLine($"[Arranque] Perfil activo HANNA_MODE={Mode}. Motor inicial: {activeEngine}.");
         foreach (var (name, decision) in BuildPlan())
         {
-            string state = decision.Enabled ? "habilitado" : "omitido por " + decision.ReasonKind;
+            string state = decision.ShouldStart ? "habilitado" : "omitido por " + decision.ReasonKind;
             Console.WriteLine($"[Arranque] {name}: {state}. {decision.Detail}");
         }
     }
@@ -203,7 +203,7 @@ internal sealed class StartupProfile
         return value switch
         {
             "full" => "full",
-            "hybrid" or "hibrido" or "híbrido" => "hybrid",
+            "hybrid" or "hibrido" or "hÃ­brido" => "hybrid",
             "telegram_only" or "telegramonly" or "telegram" or "telegram-only" => "telegram_only",
             _ => "full"
         };
@@ -219,7 +219,7 @@ internal sealed class StartupProfile
                value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
                value.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
                value.Equals("si", StringComparison.OrdinalIgnoreCase) ||
-               value.Equals("sí", StringComparison.OrdinalIgnoreCase);
+               value.Equals("sÃ­", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsValidTelegramToken(string? token)
@@ -253,10 +253,11 @@ internal sealed class StartupProfile
     }
 }
 
-internal sealed record StartupDecision(bool Enabled, string ReasonKind, string Detail)
+internal sealed record StartupDecision(bool ShouldStart, string ReasonKind, string Detail)
 {
-    public static StartupDecision Enabled(string detail) => new(true, "perfil/configuración", detail);
+    public static StartupDecision Start(string detail) => new(true, "perfil/configuraciÃ³n", detail);
     public static StartupDecision Profile(string detail) => new(false, "perfil", detail);
-    public static StartupDecision Config(string detail) => new(false, "configuración", detail);
+    public static StartupDecision Config(string detail) => new(false, "configuraciÃ³n", detail);
     public static StartupDecision Credentials(string detail) => new(false, "credenciales", detail);
 }
+
