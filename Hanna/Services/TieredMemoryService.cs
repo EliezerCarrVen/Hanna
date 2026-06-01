@@ -54,7 +54,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_memory_index_hash_unique ON memory_index(h
     public async Task UpsertDailySummaryAsync(string date, string summary, string tags, string location, string archivePath, string hash, CancellationToken cancellationToken)
     {
         date = string.IsNullOrWhiteSpace(date) ? DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : date.Trim();
-        summary = (summary ?? "").Trim();
+        summary = SecretSanitizer.Sanitize((summary ?? "").Trim());
         if (string.IsNullOrWhiteSpace(summary))
             summary = "Sin actividad relevante detectada.";
 
@@ -293,10 +293,19 @@ WHERE NOT EXISTS (SELECT 1 FROM memory_index WHERE date = $date AND summary = $s
             "reglas verdad",
             "prompt",
             "system prompt",
-            "instrucciones internas"
+            "instrucciones internas",
+            "authorization bearer",
+            "connection string",
+            "client secret",
+            "refresh token",
+            "access token",
+            "private key",
+            "env ",
+            ".env",
+            "google client secret"
         };
 
-        return blocked.Any(value.Contains);
+        return blocked.Any(value.Contains) || SecretSanitizer.LooksSensitive(summary) || SecretSanitizer.LooksSensitive(tags) || SecretSanitizer.LooksSensitive(archive);
     }
 
     private static string SanitizeVisibleSummary(string summary)
@@ -304,7 +313,7 @@ WHERE NOT EXISTS (SELECT 1 FROM memory_index WHERE date = $date AND summary = $s
         if (string.IsNullOrWhiteSpace(summary))
             return "Resumen local sin contenido visible.";
 
-        string cleaned = summary.Replace("===", " ");
+        string cleaned = SecretSanitizer.Sanitize(summary).Replace("===", " ");
         cleaned = Regex.Replace(cleaned, @"---\s*[^\r\n]+\s*---", " ");
         cleaned = Regex.Replace(cleaned, @"\s+", " ").Trim();
 
@@ -332,7 +341,7 @@ WHERE NOT EXISTS (SELECT 1 FROM memory_index WHERE date = $date AND summary = $s
                 date,
                 type = "daily_summary",
                 summary = summary.Length > 1200 ? summary[..1200] : summary,
-                tags = (tags ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
+                tags = SecretSanitizer.Sanitize(tags ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
                 location = string.IsNullOrWhiteSpace(location) ? "LOCAL" : location,
                 file = archivePath ?? "",
                 hash = hash ?? "",

@@ -47,8 +47,8 @@ internal sealed class TokenUsageLedgerService
             completionTokens = finalCompletion,
             totalTokens = total,
             estimatedUsd = finalUsd,
-            inputPreview = Clip(input, 180),
-            outputPreview = Clip(output, 180)
+            inputPreview = Clip(SecretSanitizer.Sanitize(input), 180),
+            outputPreview = Clip(SecretSanitizer.Sanitize(output), 180)
         };
 
         string line = JsonSerializer.Serialize(record);

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using Hanna.Core;
@@ -32,7 +32,7 @@ internal sealed class TtsService
             provider.Equals("off", StringComparison.OrdinalIgnoreCase) ||
             provider.Equals("disabled", StringComparison.OrdinalIgnoreCase))
         {
-            Console.WriteLine("[TTS] Desactivado por configuraciÃ³n.");
+            Console.WriteLine("[TTS] Desactivado por configuración.");
             return null;
         }
 
@@ -81,7 +81,7 @@ internal sealed class TtsService
                     return ExistingNonEmpty(mp3Path);
             }
 
-            Console.WriteLine("[TTS] No encontrÃ© edge-tts. InstÃ¡lalo con: py -m pip install --user edge-tts");
+            Console.WriteLine("[TTS] No encontré edge-tts. Instálalo con: py -m pip install --user edge-tts");
             return null;
         }
         catch (OperationCanceledException)
@@ -153,7 +153,7 @@ internal sealed class TtsService
         if (string.IsNullOrWhiteSpace(text))
             return "";
 
-        text = Regex.Replace(text, @"```[\s\S]*?```", " cÃ³digo omitido ");
+        text = Regex.Replace(text, @"```[\s\S]*?```", " código omitido ");
         text = Regex.Replace(text, @"https?://\S+", " enlace ");
         text = Regex.Replace(text, @"[/\\_`*#>\[\]{}|~]", " ");
         text = Regex.Replace(text, @"[\uD800-\uDBFF][\uDC00-\uDFFF]", " ");

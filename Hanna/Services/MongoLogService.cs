@@ -188,7 +188,7 @@ internal sealed class MongoLogService
                 { "chatId", chatId },
                 { "author", author ?? "" },
                 { "messageType", messageType ?? "" },
-                { "text", text ?? "" },
+                { "text", SecretSanitizer.Sanitize(text) },
                 { "engine", engine ?? "" },
                 { "responseMode", responseMode ?? "" },
                 { "shadowActive", false },
@@ -247,8 +247,8 @@ internal sealed class MongoLogService
                 .Inc("totalTokens", finalTotalTokens)
                 .Inc("estimatedRequests", isEstimated ? 1 : 0)
                 .Inc("exactRequests", isEstimated ? 0 : 1)
-                .Set("lastInputPreview", Clip(input, 300))
-                .Set("lastOutputPreview", Clip(output, 300))
+                .Set("lastInputPreview", Clip(SecretSanitizer.Sanitize(input), 300))
+                .Set("lastOutputPreview", Clip(SecretSanitizer.Sanitize(output), 300))
                 .Set("updatedAt", DateTime.UtcNow);
 
             await TokensDiarios!.UpdateOneAsync(
@@ -316,8 +316,8 @@ internal sealed class MongoLogService
             {
                 { "chatId", chatId },
                 { "source", source ?? "" },
-                { "message", ex.Message ?? "" },
-                { "stackTrace", ex.ToString() },
+                { "message", SecretSanitizer.Sanitize(ex.Message) },
+                { "stackTrace", SecretSanitizer.Sanitize(ex.ToString()) },
                 { "createdAt", DateTime.UtcNow }
             };
 
@@ -328,6 +328,8 @@ internal sealed class MongoLogService
             Console.WriteLine($"[MongoDB Error] RegisterError: {mongoEx.Message}");
         }
     }
+
+    public bool IsAvailable => config.MongoEnabled && database != null;
 
     private bool IsReady(IMongoCollection<BsonDocument>? collection)
     {

@@ -30,7 +30,7 @@ internal sealed class ResponseService
         if (string.IsNullOrWhiteSpace(text))
             return;
 
-        text = NeutralizeRegionalisms(text);
+        text = SecretSanitizer.Sanitize(NeutralizeRegionalisms(text));
 
         if (string.IsNullOrWhiteSpace(text))
             return;
@@ -495,6 +495,10 @@ internal sealed class ResponseService
 
     private async Task SendTextHttp(long chatId, string text, CancellationToken cancellationToken)
     {
+        text = SecretSanitizer.Sanitize(text);
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
         if (string.IsNullOrWhiteSpace(config.TelegramToken))
             return;
 

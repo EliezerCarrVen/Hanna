@@ -35,6 +35,7 @@ internal sealed class TelegramMirrorService
         if (!enabled)
             return;
 
+        text = SecretSanitizer.Sanitize(text);
         if (config.LocalChatId == 0 || string.IsNullOrWhiteSpace(config.TelegramToken) || string.IsNullOrWhiteSpace(text))
             return;
 

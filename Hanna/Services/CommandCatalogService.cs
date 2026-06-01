@@ -1,4 +1,4 @@
-﻿namespace Hanna.Services;
+namespace Hanna.Services;
 
 internal static class CommandCatalogService
 {
@@ -12,7 +12,7 @@ Motores:
 - Hanna usa Groq
 - Hanna usa Gemini
 - Hanna usa OpenRouter
-- Hanna usa modo hÃ­brido
+- Hanna usa modo híbrido
 - /modo texto
 - /modo audio
 - /modo ambos
@@ -31,7 +31,7 @@ Tokens:
 - /tokens texto TU_TEXTO
 - /tokens archivo "C:\ruta\archivo.txt"
 
-Telegram y autorizaciÃ³n:
+Telegram y autorización:
 - /miid
 - /auth
 - /shadow
@@ -43,10 +43,10 @@ Spotify:
 - /dispositivos
 - /dispositivo 1
 - reproduce mi playlist NOMBRE
-- reproduce la canciÃ³n NOMBRE
-- reproduce el Ã¡lbum NOMBRE
+- reproduce la canción NOMBRE
+- reproduce el álbum NOMBRE
 - pausa Spotify
-- siguiente canciÃ³n
+- siguiente canción
 
 Voz y pantalla:
 - F8: voz local sin ventana
@@ -54,16 +54,16 @@ Voz y pantalla:
 - AltGr+Shift+H: voz local con ventana
 - F9: analizar pantalla
 
-CÃ¡mara:
-- enciende cÃ¡mara
-- apaga cÃ¡mara
-- activa indicador de cÃ¡mara
-- desactiva indicador de cÃ¡mara
+Cámara:
+- enciende cámara
+- apaga cámara
+- activa indicador de cámara
+- desactiva indicador de cámara
 
 Admin web:
 - http://127.0.0.1:8787
 
-API mÃ³vil:
+API móvil:
 - http://127.0.0.1:8790
 """;
     }
@@ -78,7 +78,7 @@ API mÃ³vil:
                 "Hanna usa Groq",
                 "Hanna usa Gemini",
                 "Hanna usa OpenRouter",
-                "Hanna usa modo hÃ­brido",
+                "Hanna usa modo híbrido",
                 "/modo texto",
                 "/modo audio",
                 "/modo ambos"
@@ -118,10 +118,10 @@ API mÃ³vil:
                 "/dispositivos",
                 "/dispositivo 1",
                 "reproduce mi playlist NOMBRE",
-                "reproduce la canciÃ³n NOMBRE",
-                "reproduce el Ã¡lbum NOMBRE",
+                "reproduce la canción NOMBRE",
+                "reproduce el álbum NOMBRE",
                 "pausa Spotify",
-                "siguiente canciÃ³n"
+                "siguiente canción"
             },
             vozPantalla = new[]
             {
@@ -132,10 +132,10 @@ API mÃ³vil:
             },
             camara = new[]
             {
-                "enciende cÃ¡mara",
-                "apaga cÃ¡mara",
-                "activa indicador de cÃ¡mara",
-                "desactiva indicador de cÃ¡mara"
+                "enciende cámara",
+                "apaga cámara",
+                "activa indicador de cámara",
+                "desactiva indicador de cámara"
             }
         };
     }

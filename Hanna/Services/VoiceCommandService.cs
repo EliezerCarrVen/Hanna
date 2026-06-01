@@ -1,4 +1,4 @@
-﻿using Hanna.Core;
+using Hanna.Core;
 using Hanna.Models;
 using Hanna.Skills;
 using Telegram.Bot;
@@ -188,14 +188,14 @@ internal sealed class VoiceCommandService
 
         if (result.SkipResponse)
             {
-                Console.WriteLine("[Voz local] La skill pidiÃ³ no responder.");
+                Console.WriteLine("[Voz local] La skill pidió no responder.");
                 return;
             }
 
             if (!result.Handled || string.IsNullOrWhiteSpace(result.ResponseText))
             {
                 Console.WriteLine("[Voz local] Sin respuesta de skill. Usando fallback visible.");
-                result = SkillResult.Text("Te escuchÃ©, pero Hanna no logrÃ³ generar respuesta desde el motor. Revisa la lÃ­nea [Router] en consola para ver quÃ© intent se clasificÃ³.");
+                result = SkillResult.Text("Te escuché, pero Hanna no logró generar respuesta desde el motor. Revisa la línea [Router] en consola para ver qué intent se clasificó.");
             }
 
         Console.WriteLine($"🤖 Hanna local → {result.ResponseText}");

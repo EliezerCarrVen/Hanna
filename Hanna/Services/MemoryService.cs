@@ -15,7 +15,7 @@ internal sealed class MemoryService
 
     public async Task Save(long chatId, string memory, CancellationToken cancellationToken)
     {
-        string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {memory.Trim()}{Environment.NewLine}";
+        string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {SecretSanitizer.Sanitize(memory.Trim())}{Environment.NewLine}";
         await File.AppendAllTextAsync(GetPath(chatId), line, Encoding.UTF8, cancellationToken);
     }
 
@@ -28,6 +28,6 @@ internal sealed class MemoryService
 
         string content = await File.ReadAllTextAsync(path, Encoding.UTF8, cancellationToken);
 
-        return string.IsNullOrWhiteSpace(content) ? "Aún no tengo memoria guardada para este chat." : content.Trim();
+        return string.IsNullOrWhiteSpace(content) ? "Aún no tengo memoria guardada para este chat." : SecretSanitizer.Sanitize(content.Trim());
     }
 }

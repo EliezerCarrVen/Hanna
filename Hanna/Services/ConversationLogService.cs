@@ -22,7 +22,7 @@ internal sealed class ConversationLogService
 
     public async Task RegisterMessage(long chatId, string role, string content, CancellationToken cancellationToken = default)
     {
-        string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [CHAT {chatId}] [{role}] {TextTools.CleanLog(content)}{Environment.NewLine}";
+        string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [CHAT {chatId}] [{role}] {SecretSanitizer.Sanitize(TextTools.CleanLog(content))}{Environment.NewLine}";
 
         await semaphore.WaitAsync(cancellationToken);
 
@@ -39,7 +39,7 @@ internal sealed class ConversationLogService
 
     public async Task RegisterSystem(string content, CancellationToken cancellationToken = default)
     {
-        string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [SISTEMA] {content}{Environment.NewLine}";
+        string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [SISTEMA] {SecretSanitizer.Sanitize(content)}{Environment.NewLine}";
 
         await semaphore.WaitAsync(cancellationToken);
 
@@ -57,7 +57,7 @@ internal sealed class ConversationLogService
     {
         try
         {
-            string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [SISTEMA] {content}{Environment.NewLine}";
+            string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [SISTEMA] {SecretSanitizer.Sanitize(content)}{Environment.NewLine}";
 
             lock (syncLock)
                 File.AppendAllText(SessionLogPath, line, Encoding.UTF8);
