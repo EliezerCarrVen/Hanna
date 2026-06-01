@@ -99,3 +99,8 @@ Hanna/SelfKnowledge/
 Hanna/hanna_self_knowledge/
 Hanna/Prompts/Chats/chat_owner_*.md
 Hanna/extras/**/audit_logs/
+
+# Hanna Web UI generated artifacts
+HannaWebUI/dist/
+HannaWebUI/build/
+*.tsbuildinfo
