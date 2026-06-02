@@ -5,6 +5,8 @@ namespace Hanna.Lightweight.Services;
 public sealed class LightweightStartupService(
     LightweightOptions options,
     RuntimePaths paths,
+    PathGuardService pathGuard,
+    LogRotationService logRotation,
     FlatFileMemoryService memoryService,
     MarkdownVaultService markdownVault,
     AuditLogService auditLog,
@@ -15,18 +17,21 @@ public sealed class LightweightStartupService(
     {
         foreach (var directory in paths.Directories)
         {
+            pathGuard.EnsureInsideRoot(directory);
             Directory.CreateDirectory(directory);
         }
 
         foreach (var file in paths.Files)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(file) ?? paths.DataRoot);
-            if (!File.Exists(file))
+            var safeFile = pathGuard.EnsureInsideRoot(file);
+            Directory.CreateDirectory(Path.GetDirectoryName(safeFile) ?? paths.DataRoot);
+            if (!File.Exists(safeFile))
             {
-                await File.WriteAllTextAsync(file, file.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ? "# Rolling summary\n\nPendiente de generar.\n" : string.Empty, cancellationToken);
+                await File.WriteAllTextAsync(safeFile, safeFile.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ? "# Rolling summary\n\nPendiente de generar.\n" : string.Empty, cancellationToken);
             }
         }
 
+        logRotation.RotateKnownLogs();
         await LogAsync("Hanna Lightweight startup completed.", cancellationToken);
         await memoryService.AddShortMemoryAsync("startup", "entrada de prueba inicial de Hanna Lightweight", ["startup", "prueba"], cancellationToken);
         await markdownVault.CreateMemoryNoteAsync("Nota de prueba inicial", "Memoria Markdown de prueba creada al arrancar Hanna Lightweight.", cancellationToken);
@@ -35,6 +40,10 @@ public sealed class LightweightStartupService(
         return new StartupReport(options.Mode, options.MemoryMode, paths.Vault, paths.ShortMemory, searchService.IsRipgrepAvailable, modules.GetModules());
     }
 
-    public Task LogAsync(string message, CancellationToken cancellationToken = default) =>
-        File.AppendAllTextAsync(paths.LightweightLog, $"{DateTimeOffset.UtcNow:O} {message}{Environment.NewLine}", cancellationToken);
+    public Task LogAsync(string message, CancellationToken cancellationToken = default)
+    {
+        var safePath = pathGuard.EnsureInsideRoot(paths.LightweightLog);
+        logRotation.RotateIfNeeded(safePath);
+        return File.AppendAllTextAsync(safePath, $"{DateTimeOffset.UtcNow:O} {message}{Environment.NewLine}", cancellationToken);
+    }
 }

@@ -2,9 +2,22 @@
 
 Hanna.Lightweight es un proyecto paralelo a Hanna principal. No reemplaza `Hanna/Hanna.csproj`, no modifica `Hanna/Program.cs`, no toca Telegram, WebUI, `/motor`, `/fase`, `HANNA_MODE`, MongoDB ni MySQL.
 
-## Objetivo
+## Qué ya funciona
 
-Crear una Hanna Lite para hardware limitado como HP Mini 110 con CPU Intel Atom y disco de 250 GB. La prioridad es bajo consumo, costo mínimo, memoria flat-file, Markdown/Obsidian, JSONL, ripgrep, seguridad local y una arquitectura preparada para futuras fases Master/Worker.
+- Arranque de consola ligera con modo `lightweight` y memoria `flat-file`.
+- Creación automática de `HannaData/`.
+- Memoria corta JSONL en `runtime/short_memory.jsonl`.
+- Vault Markdown compatible con Obsidian en `vault/`.
+- Búsqueda local con `rg` o fallback C#.
+- Caché de código mínimo con notas Markdown, YAML frontmatter, índice JSONL y deduplicación SHA256.
+- Filtro de secretos con registro seguro de redacciones en `logs/security.log`.
+- Rotación local de logs cuando superan el límite configurado.
+- Auditoría local JSONL en `logs/audit.log`.
+- Doctor, self-test, rolling summary local e índice simple de vault.
+
+## Qué no se debe reimplementar
+
+No reconstruir desde cero el arranque, la estructura `HannaData/`, JSONL, Markdown vault, búsqueda `rg`/fallback, caché mínimo, filtro básico, logs, auditoría ni comandos iniciales. Solo deben extenderse con cambios pequeños y seguros.
 
 ## Cómo ejecutar
 
@@ -14,66 +27,68 @@ Hanna principal:
 dotnet run --project Hanna/Hanna.csproj
 ```
 
-Hanna.Lightweight:
+Hanna.Lightweight interactivo:
 
 ```bash
 dotnet run --project Hanna.Lightweight/Hanna.Lightweight.csproj
 ```
 
-## Qué funciona realmente
+Self-test sin sesión interactiva:
 
-- Creación automática de `HannaData/`.
-- Memoria corta en `runtime/short_memory.jsonl`.
-- Notas Markdown en `vault/memoria`.
-- Caché mínimo de código en `vault/codigo_cache`.
-- Búsqueda local con `rg` si existe, con fallback C# si no existe.
-- Filtro de secretos antes de persistir memoria.
-- Logs locales en `logs/lightweight.log`.
-- Auditoría simulada en `logs/audit.log`.
+```bash
+dotnet run --project Hanna.Lightweight/Hanna.Lightweight.csproj -- --self-test
+```
+
+Ejecutar un comando y salir:
+
+```bash
+dotnet run --project Hanna.Lightweight/Hanna.Lightweight.csproj -- --once "/status"
+dotnet run --project Hanna.Lightweight/Hanna.Lightweight.csproj -- --once "/doctor"
+```
 
 ## Comandos
 
-- `/status`: muestra modo, rutas, módulos y estado de ripgrep.
-- `/memoria prueba`: escribe una entrada JSONL y una nota Markdown.
-- `/memoria buscar TEXTO`: busca texto dentro de `HannaData/vault`.
-- `/codigo prueba`: crea una nota de caché de código de prueba.
-- `/codigo buscar TEXTO`: busca en `vault/codigo_cache`.
-- `/modulos`: lista módulos implementados y planificados.
+- `/help`: lista comandos disponibles.
+- `/status`: estado, rutas, conteos, módulos y salud global.
+- `/doctor`: revisa estructura, permisos, logs, configuración, ripgrep, módulos y `.gitignore`.
+- `/selftest`: ejecuta el mismo flujo que `--self-test`.
+- `/memoria prueba`: escribe entrada JSONL y nota Markdown.
+- `/memoria buscar TEXTO`: busca dentro de `HannaData/vault`.
+- `/codigo prueba`: crea entrada segura de caché de código.
+- `/codigo buscar TEXTO`: busca dentro de `vault/codigo_cache`.
+- `/codigo listar`: muestra entradas recientes del índice de caché.
+- `/codigo estado`: muestra estado del caché de código.
+- `/summary` y `/summary regenerar`: crean `runtime/last_summary.md` con resumen extractivo local, no IA.
+- `/indexar`: regenera `indexes/vault_index.jsonl`.
+- `/indice estado`: muestra estado del índice del vault.
+- `/modulos`: lista módulos implementados, parciales y planificados.
 - `/auditoria`: muestra últimos eventos de auditoría.
 - `/salir`: cierra la consola.
 
-## Estructura HannaData
+## PathGuard
 
-```text
-HannaData/
-  vault/
-    memoria/
-    proyectos/
-    sistema/
-    inventario/
-    tareas/
-    codigo_cache/
-    bovedas/
-    perfiles/
-    empresa/
-  runtime/
-    short_memory.jsonl
-    current_session.jsonl
-    last_summary.md
-  indexes/
-    file_index.jsonl
-    vault_index.jsonl
-    code_cache_index.jsonl
-  logs/
-    lightweight.log
-    security.log
-    audit.log
-```
+`PathGuardService` impide escrituras fuera de `HannaData/`, bloquea rutas con `..`, rutas vacías, `.env`, `HannaEnv`, appsettings sensibles y configuraciones con secretos. Los intentos bloqueados se registran sin guardar la ruta original completa.
 
-## Datos que nunca deben persistirse
+## SecretFilter
 
-No se deben guardar tokens, API keys, contraseñas, prompts internos, system prompts, `HannaEnv` ni configuraciones sensibles. El filtro redacta términos como `TELEGRAM_TOKEN`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `SPOTIFY_CLIENT_SECRET`, `MYSQL_PASSWORD`, `HANNA_JWT_SECRET` y `HANNA_MOBILE_API_PAIRING_TOKEN`.
+`SecretFilterService` redacta patrones como `api_key=`, `apikey=`, `token=`, `bearer`, `password=`, `pwd=`, `secret=`, `client_secret=`, `refresh_token=`, tokens conocidos de Hanna, cadenas de conexión MySQL/Postgres con password, URLs con credenciales, JWT compactos y prefijos `sk-or-v1`, `gsk_` y `AIza`. El reemplazo siempre es `[REDACTED]`.
+
+## Log rotation
+
+`LogRotationService` rota `lightweight.log`, `audit.log` y `security.log` cuando superan `MaxLogFileBytes`. El archivo se renombra como `nombre.yyyyMMddHHmmss.log`. No borra logs todavía.
+
+## Rolling summary local
+
+`/summary` lee las últimas entradas de `short_memory.jsonl`, calcula temas por palabras frecuentes, lista últimas acciones, agrega advertencias de redacción y escribe `runtime/last_summary.md`. Es extractivo local, sin LLM ni servicios externos.
+
+## Vault index
+
+`/indexar` recorre `HannaData/vault/`, ignora archivos mayores a `MaxSearchFileBytes`, calcula SHA256 y guarda ruta relativa, nombre, extensión, tamaño, fecha y tags de frontmatter en `indexes/vault_index.jsonl`.
+
+## HannaData no se sube a GitHub
+
+`HannaData/` contiene memoria local, logs, auditoría, índices y runtime. Debe permanecer fuera del repositorio y está en `.gitignore` para evitar subir datos privados o sensibles.
 
 ## Planificado, no implementado
 
-Los módulos peligrosos quedan documentados y en `DryRun=true`: búnker cifrado AES-256, MQTT real, Node-RED, Master/Worker real, NAS indexer real, RBAC real, ClamAV, Wake-on-LAN, Serverless, Zero-Leak RAG, NTP, notificación de IP pública, Docker staging/production, voz local y walkie-talkie P2P.
+Siguen en `planned_not_implemented` o `DryRun=true`: búnker cifrado AES-256, ofuscación por GUID, índice maestro cifrado, IP/MAC whitelisting, TOTP/2FA, visor en RAM, ingesta ciega por voz, multi-bóvedas, MQTT real, voz local, walkie-talkie P2P, multi-tenant real, RBAC real, auditoría firmada, ClamAV, Docker, Node-RED, Wake-on-LAN, Zero-Leak RAG, failsafe, NTP, notificación IP pública, NAS indexer real, Serverless, traducción dinámica y enrutamiento semántico real.
