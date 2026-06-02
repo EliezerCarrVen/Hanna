@@ -107,3 +107,5 @@ HannaWebUI/build/
 
 # Hanna.Lightweight local runtime data
 HannaData/
+
+Hanna.Lightweight/appsettings.local.json

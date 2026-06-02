@@ -92,3 +92,22 @@ dotnet run --project Hanna.Lightweight/Hanna.Lightweight.csproj -- --once "/doct
 ## Planificado, no implementado
 
 Siguen en `planned_not_implemented` o `DryRun=true`: búnker cifrado AES-256, ofuscación por GUID, índice maestro cifrado, IP/MAC whitelisting, TOTP/2FA, visor en RAM, ingesta ciega por voz, multi-bóvedas, MQTT real, voz local, walkie-talkie P2P, multi-tenant real, RBAC real, auditoría firmada, ClamAV, Docker, Node-RED, Wake-on-LAN, Zero-Leak RAG, failsafe, NTP, notificación IP pública, NAS indexer real, Serverless, traducción dinámica y enrutamiento semántico real.
+
+## Enterprise portable HP Mini
+
+Los módulos principales ya no se reportan como `planned_not_implemented` cuando existe control plane portable. Ahora usan estados como `implemented`, `partial`, `dry_run`, `missing_dependency`, `missing_configuration`, `missing_hardware_or_network`, `disabled_by_config`, `unsafe_without_confirmation`, `failed` y `planned_only`.
+
+Comandos adicionales:
+
+- `/deps` y `/deps instalar sugerencias`
+- `/vault crear|listar|estado|importar|exportar|verificar|doctor|map|buscar`
+- `/totp estado|generar-secreto|verificar`
+- `/red whitelist estado|agregar|listar|probar`
+- `/usuarios`, `/roles`, `/permisos`, `/tenant`
+- `/clamav`, `/docker`, `/nodered`, `/mqtt`, `/wol`, `/nas`
+- `/zeroleak`, `/intencion`, `/enrutar`
+- `/codigo traducir`, `/codigo traducciones`, `/codigo traduccion estado`
+- `/serverless`, `/sistema doctor`, `/ntp estado`, `/ip estado`, `/failsafe estado`
+- `/voz estado`, `/walkie estado`, `/visor estado`, `/ingesta estado`, `/logs estado`
+
+Todos los módulos peligrosos mantienen `DryRun=true` por defecto o exigen configuración/confirmación explícita.
