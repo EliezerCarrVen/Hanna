@@ -1,4 +1,4 @@
-﻿# =========================
+# =========================
 # Hanna / .NET / Visual Studio
 # =========================
 bin/
@@ -104,3 +104,8 @@ Hanna/extras/**/audit_logs/
 HannaWebUI/dist/
 HannaWebUI/build/
 *.tsbuildinfo
+
+# Hanna.Lightweight local runtime data
+HannaData/
+
+Hanna.Lightweight/appsettings.local.json

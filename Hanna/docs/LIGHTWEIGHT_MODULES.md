@@ -1,37 +1,57 @@
 # Módulos Hanna.Lightweight
 
-## Implementados
+## Funcionales
 
 | Módulo | Estado | Alcance |
 | --- | --- | --- |
 | flat-file memory | implemented | JSONL y Markdown locales. |
 | markdown vault | implemented | Bóveda compatible con Obsidian. |
-| ripgrep search | implemented/fallback | `rg` si existe; fallback C#. |
-| code cache | minimal implemented | Nota Markdown e índice JSONL mínimo. |
+| ripgrep search | implemented/fallback | `rg` si existe; fallback C# con límites de tamaño. |
+| PathGuard | implemented | Bloqueo de escrituras fuera de `HannaData/`. |
+| log rotation | implemented | Rotación por tamaño para logs locales. |
+| doctor/self-test | implemented | Validaciones locales PASS/WARN/FAIL. |
+
+## Parciales seguros
+
+| Módulo | Estado | Alcance |
+| --- | --- | --- |
+| code cache | partial | Markdown, frontmatter, índice JSONL y deduplicación SHA256. |
+| rolling summary | partial | Resumen extractivo local, no IA. |
+| vault index | partial | Índice JSONL local regenerable. |
+| SecretFilter | partial | Redacción por patrones; ampliar con tests futuros. |
 
 ## Planificados, no implementados
 
 | Módulo | Estado | DryRun |
 | --- | --- | --- |
-| encrypted vault | planned_not_implemented | true |
-| MQTT | planned_not_implemented | true |
-| Node-RED | planned_not_implemented | true |
-| Master/Worker | planned_not_implemented | true |
-| NAS indexer | planned_not_implemented | true |
-| RBAC | planned_not_implemented | true |
-| ClamAV | planned_not_implemented | true |
-| Wake-on-LAN | planned_not_implemented | true |
-| serverless | planned_not_implemented | true |
-| voz local | planned_not_implemented | true |
-| walkie-talkie P2P | planned_not_implemented | true |
+| Búnker cifrado AES-256 | planned_not_implemented | true |
+| Ofuscación física por GUID | planned_not_implemented | true |
+| Índice maestro cifrado | planned_not_implemented | true |
+| IP/MAC whitelisting | planned_not_implemented | true |
+| TOTP/2FA | planned_not_implemented | true |
+| Visor en RAM | planned_not_implemented | true |
+| Ingesta ciega por voz | planned_not_implemented | true |
+| Multi-bóvedas aisladas | planned_not_implemented | true |
+| MQTT real | planned_not_implemented | true |
+| Voz local | planned_not_implemented | true |
+| Walkie-talkie P2P | planned_not_implemented | true |
+| Sinergia de pareja | planned_not_implemented | true |
+| Multi-tenant real | planned_not_implemented | true |
+| RBAC real | planned_not_implemented | true |
+| Auditoría firmada criptográficamente | planned_not_implemented | true |
+| ClamAV real | planned_not_implemented | true |
+| Docker staging/production | planned_not_implemented | true |
+| Node-RED real | planned_not_implemented | true |
+| Wake-on-LAN real | planned_not_implemented | true |
 | Zero-Leak RAG | planned_not_implemented | true |
-| traducción dinámica bajo demanda | planned_not_implemented | true |
-| enrutamiento semántico de intenciones | planned_not_implemented | true |
-| failsafe eléctrico | planned_not_implemented | true |
+| Failsafe post-corte | planned_not_implemented | true |
 | NTP | planned_not_implemented | true |
-| notificación IP pública | planned_not_implemented | true |
-| inventario local avanzado | planned_not_implemented | true |
+| Notificación IP pública | planned_not_implemented | true |
+| NAS indexer real | planned_not_implemented | true |
+| Serverless | planned_not_implemented | true |
+| Traducción dinámica real | planned_not_implemented | true |
+| Enrutamiento semántico real | planned_not_implemented | true |
 
-## Interfaces futuras
+## Regla de extensión
 
-Solo se permitirán interfaces seguras, explícitas y con rechazo por defecto. Ninguna acción peligrosa debe ejecutarse por inferencia semántica sin confirmación humana.
+No reimplementar módulos funcionales; extenderlos mediante PRs pequeñas, con self-test y doctor actualizados.
