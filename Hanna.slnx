@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="Hanna/Hanna.csproj" />
+  <Project Path="Hanna.Lightweight/Hanna.Lightweight.csproj" />
+  <Project Path="Hanna.Lightweight.Tests/Hanna.Lightweight.Tests.csproj" />
 </Solution>

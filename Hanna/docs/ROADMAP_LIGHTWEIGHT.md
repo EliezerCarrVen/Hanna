@@ -1,234 +1,52 @@
-# Roadmap Lightweight de Hanna
+# Roadmap Hanna.Lightweight
 
-## Alcance
+## Fase actual: hardening local seguro
 
-Este roadmap organiza la evolución ligera de Hanna por fases. Las fases futuras están **planificadas, no implementadas** y no deben reemplazar la arquitectura actual hasta que exista una PR específica, pruebas y mecanismo de rollback.
+Ya existen arranque, `HannaData/`, JSONL, Markdown vault, búsqueda, caché mínimo, logs, auditoría y comandos iniciales. Esta fase no los reimplementa; agrega protección y diagnósticos:
 
-## Fase 0: congelar versión estable
+- `HannaData/` en `.gitignore`.
+- `--self-test`, `/selftest` y `--once`.
+- `/doctor` con PASS/WARN/FAIL.
+- `PathGuardService` para impedir escrituras fuera de `HannaData/`.
+- límites de tamaño para memoria, búsqueda, logs y comandos.
+- `LogRotationService`.
+- `SecretFilterService` ampliado.
+- `/summary` local extractivo.
+- `/indexar` e `/indice estado`.
+- caché de código con deduplicación SHA256 y estado/listado.
 
-### Objetivo
+## Qué no debe reimplementarse
 
-Establecer una línea base de la versión actual antes de conectar componentes lightweight.
+No rehacer desde cero el núcleo funcional: startup, estructura `HannaData/`, JSONL, vault Markdown, búsqueda `rg`/fallback, logs, auditoría, comandos base ni modelos existentes. Las siguientes fases deben integrarse de forma incremental.
 
-### Archivos probables
+## Fase siguiente recomendada
 
-- `Hanna/Hanna.csproj`
-- `Hanna/Program.cs`
-- `Hanna/Core/AppConfig.cs`
-- `Hanna/Services/TelegramService.cs`
-- `Hanna/Services/MemoryService.cs`
-- `Hanna/Services/TieredMemoryService.cs`
-- `Hanna/docs/`
+- Tests unitarios para SecretFilter, PathGuard, LogRotation, JSONL, doctor, self-test e indexación.
+- Modo `--data-root` seguro si se requiere ubicación configurable dentro de una allowlist.
+- Rotación con retención máxima configurable.
+- Índices regenerables por lotes para hardware lento.
 
-### Riesgos
+## Fases futuras planificadas
 
-- No detectar regresiones existentes.
-- Cambiar comportamiento de Telegram, `/motor`, `/fase` o `HANNA_MODE` sin intención.
+### Obsidian y memoria avanzada
 
-### Pruebas
+Frontmatter estable, backlinks, tareas, rolling summary incremental y cache semántico local sin servicios externos.
 
-- `dotnet build Hanna/Hanna.csproj --no-incremental`
-- Pruebas manuales de arranque con configuración actual.
-- Verificación manual de comandos Telegram críticos.
+### Master/Worker seguro
 
-### Resultado esperado
+Contratos JSON estrictos, autenticación, auditoría, confirmación humana y `DryRun=true` por defecto. No conectar con Hanna principal todavía.
 
-Una referencia estable documentada y lista para comparar cambios futuros.
+### MQTT, IoT y Node-RED
 
-## Fase 1: memoria flat-file
+Broker local autorizado, allowlist de tópicos, staging, simulación previa y confirmación humana.
 
-### Objetivo
+### Enterprise real
 
-Agregar una memoria opcional basada en Markdown, JSONL y rolling summary, sin reemplazar MongoDB, MySQL ni servicios actuales.
+Multi-tenant, RBAC, auditoría firmada, búnker cifrado, ClamAV, NAS indexer, Docker y Serverless. Todo sigue `planned_not_implemented` hasta PR específica.
 
-### Archivos probables
+## Riesgos pendientes
 
-- `Hanna/Core/Lightweight/FlatFileMemoryOptions.cs`
-- `Hanna/Core/Lightweight/ShortMemoryEntry.cs`
-- `Hanna/Services/FlatFileMemoryService.cs` (planificado, no implementado)
-- `Hanna/docs/FLAT_FILE_MEMORY.md`
-
-### Riesgos
-
-- Duplicación de recuerdos.
-- Escrituras excesivas en hardware lento.
-- Persistencia accidental de secretos.
-
-### Pruebas
-
-- Build completo.
-- Pruebas unitarias de serialización JSONL cuando existan.
-- Pruebas de búsqueda con `rg` en una bóveda temporal.
-
-### Resultado esperado
-
-Memoria flat-file disponible detrás de configuración explícita y apagada por defecto.
-
-## Fase 2: Worker Service
-
-### Objetivo
-
-Crear un Worker Service opcional para tareas de fondo ligeras y desacopladas.
-
-### Archivos probables
-
-- `Hanna/Workers/LightweightWorker.cs` (planificado, no implementado)
-- `Hanna/Core/Lightweight/`
-- `Hanna/Core/AppConfig.cs`
-- `Hanna/docs/MASTER_WORKER_ARCHITECTURE.md`
-
-### Riesgos
-
-- Consumo innecesario de CPU/RAM.
-- Dificultad para apagar limpiamente.
-- Interacciones accidentales con servicios actuales.
-
-### Pruebas
-
-- Build completo.
-- Arranque con worker deshabilitado.
-- Arranque con worker habilitado en modo dry-run cuando se implemente.
-
-### Resultado esperado
-
-Worker apagado por defecto, seguro y sin impacto en la versión actual.
-
-## Fase 3: comandos por JSON/tool calling
-
-### Objetivo
-
-Definir y validar comandos JSON estrictos antes de permitir acciones automatizadas.
-
-### Archivos probables
-
-- `Hanna/Core/Lightweight/ToolAction.cs`
-- `Hanna/Core/Lightweight/ToolActionResult.cs`
-- `Hanna/Services/ToolActionValidatorService.cs` (planificado, no implementado)
-- `Hanna/docs/TOOL_CALLING_SCHEMA.md`
-
-### Riesgos
-
-- Ejecución de comandos peligrosos.
-- Interpretación laxa de JSON.
-- Falta de confirmación humana.
-
-### Pruebas
-
-- Validación de esquemas permitidos y rechazados.
-- Pruebas con acciones peligrosas simuladas.
-- Verificar que no exista ejecución real hasta habilitación explícita.
-
-### Resultado esperado
-
-Canal de intención estructurada en JSON con deny-by-default y confirmaciones.
-
-## Fase 4: MQTT
-
-### Objetivo
-
-Agregar mensajería local ligera para Master/Worker.
-
-### Archivos probables
-
-- `Hanna/Services/MqttBridgeService.cs` (planificado, no implementado)
-- `Hanna/Core/Lightweight/`
-- `Hanna/docs/MASTER_WORKER_ARCHITECTURE.md`
-
-### Riesgos
-
-- Exposición de comandos en red local.
-- Falta de autenticación.
-- Reintentos que dupliquen acciones.
-
-### Pruebas
-
-- Broker local de prueba.
-- Mensajes firmados o autenticados cuando aplique.
-- Verificación de `HANNA_MQTT_ENABLED=false` por defecto.
-
-### Resultado esperado
-
-MQTT opcional, configurado explícitamente y sin ejecución peligrosa automática.
-
-## Fase 5: NAS indexer
-
-### Objetivo
-
-Crear índice de inventario para archivos de NAS o almacenamiento compartido, inicialmente solo lectura.
-
-### Archivos probables
-
-- `Hanna/Services/NasIndexerService.cs` (planificado, no implementado)
-- `Hanna/Core/Lightweight/`
-- `HannaData/indexes/file_index.jsonl`
-
-### Riesgos
-
-- Recorrer rutas enormes.
-- Indexar datos privados.
-- Bloquear red o disco.
-
-### Pruebas
-
-- Carpeta de prueba pequeña.
-- Límites de tamaño, profundidad y extensiones.
-- Confirmar que no modifica archivos remotos.
-
-### Resultado esperado
-
-Inventario local consultable, seguro y acotado.
-
-## Fase 6: VPN/red
-
-### Objetivo
-
-Documentar y preparar conectividad segura entre nodos sin automatizar infraestructura sensible en fases tempranas.
-
-### Archivos probables
-
-- `Hanna/docs/MASTER_WORKER_ARCHITECTURE.md`
-- `Hanna/docs/ROADMAP_LIGHTWEIGHT.md`
-- Scripts futuros de diagnóstico (planificado, no implementado)
-
-### Riesgos
-
-- Exponer servicios internos.
-- Automatizar cambios de red sin confirmación.
-- Confundir red local con red confiable.
-
-### Pruebas
-
-- Checklist manual de conectividad.
-- Validación de puertos esperados.
-- Confirmación explícita antes de acciones de red.
-
-### Resultado esperado
-
-Diseño de red claro, con seguridad primero y sin cambios automáticos no autorizados.
-
-## Fase 7: serverless
-
-### Objetivo
-
-Evaluar procesamiento externo puntual para tareas que no deban ejecutarse en el HP Mini 110.
-
-### Archivos probables
-
-- `Hanna/docs/MASTER_PLAN_LIGHTWEIGHT.md`
-- `Hanna/Services/ServerlessBridgeService.cs` (planificado, no implementado)
-
-### Riesgos
-
-- Costos inesperados.
-- Envío de datos sensibles.
-- Dependencia de servicios externos.
-
-### Pruebas
-
-- Dry-run con payloads mínimos.
-- Límites de presupuesto.
-- Auditoría de datos enviados.
-
-### Resultado esperado
-
-Capacidad opcional de offload, protegida por configuración y presupuestos.
+- Falsos negativos del filtro de secretos.
+- Falsos positivos al redactar cadenas largas.
+- Crecimiento de logs si no se define retención.
+- Compilación pendiente cuando el entorno no tiene .NET SDK.
