@@ -1,0 +1,19 @@
+[Unit]
+Description=Hanna NodeLightweight Assistant
+After=network.target
+
+[Service]
+Type=simple
+# Edita este usuario antes de instalar el servicio.
+User=CHANGE_ME
+# Edita esta ruta para apuntar a tu checkout de Hanna.NodeLightweight.
+WorkingDirectory=/ruta/a/tu/Hanna.NodeLightweight
+ExecStart=/usr/bin/node src/index.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+# Limitar RAM a 250MB para proteger HP Mini / Debian i386.
+MemoryMax=250M
+
+[Install]
+WantedBy=multi-user.target

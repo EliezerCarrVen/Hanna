@@ -1,4 +1,17 @@
 const readline = require('readline');
+const { SafeLogService } = require('./services/safeLogService');
+const logger = new SafeLogService();
+
+process.on('uncaughtException', (error) => {
+  logger.write('CRITICAL_CRASH', { error: error.message, stack: error.stack });
+  console.error('Error crítico interceptado. Hanna sigue viva (o se reiniciará).', error.message);
+});
+
+process.on('unhandledRejection', (reason) => {
+  const message = reason && reason.message ? reason.message : String(reason);
+  logger.write('UNHANDLED_PROMISE', { reason: message });
+  console.error('Promesa no manejada interceptada por Hanna.', message);
+});
 const { StartupService } = require('./services/startupService');
 const { CommandRouter } = require('./cli/commandRouter');
 
@@ -22,5 +35,5 @@ async function main() {
     if (line.trim() === '/salir') rl.close(); else rl.prompt();
   });
 }
-if (require.main === module) main().catch(e => { console.error('Hanna startup error:', e.message); process.exit(1); });
+if (require.main === module) main().catch(error => { logger.write('STARTUP_ERROR', { error: error.message, stack: error.stack }); console.error('Hanna startup error:', error.message); process.exit(1); });
 module.exports = { main };
