@@ -1,0 +1,15 @@
+[Unit]
+Description=Node-RED optional orchestrator for Hanna
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env node-red --userDir /var/lib/hanna/node-red
+Restart=on-failure
+User=hanna
+Group=hanna
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

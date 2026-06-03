@@ -1,0 +1,3 @@
+const http = require('http'); const { config } = require('../core/config'); const { commandExists } = require('../utils/processRunner');
+class NodeRedConnectorService { status() { return { status: commandExists('node-red') ? 'found' : 'missing_dependency', url: config.nodeRedUrl, optional: true }; } ping() { return new Promise(resolve => { const req = http.get(config.nodeRedUrl, res => { res.resume(); resolve({ status: 'reachable', code: res.statusCode }); }); req.setTimeout(1500, () => { req.destroy(); resolve({ status: 'service_unavailable' }); }); req.on('error', e => resolve({ status: 'service_unavailable', error: e.message })); }); } }
+module.exports = { NodeRedConnectorService };
