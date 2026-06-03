@@ -1,0 +1,3 @@
+const { DependencyCheckerService } = require('./dependencyCheckerService'); const { SystemDiagnosticsService } = require('./systemDiagnosticsService'); const { VaultEncryptionService } = require('./vaultEncryptionService'); const { MqttService } = require('./mqttService'); const { NasIndexerService } = require('./nasIndexerService');
+class DoctorService { async run() { const deps = new DependencyCheckerService().checkAll(); return { status: 'ok', diagnostics: new SystemDiagnosticsService().diagnose(), dependencies: deps, blocked: { vault: new VaultEncryptionService().status(), mqtt: new MqttService().status(), nas: new NasIndexerService().status() } }; } }
+module.exports = { DoctorService };

@@ -1,0 +1,22 @@
+{
+  "name": "hanna-node-lightweight",
+  "version": "0.1.0",
+  "description": "Hanna portable Node.js/JavaScript runtime for HP Mini 110 Debian 12 i386/x86.",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "start": "node src/index.js",
+    "self-test": "node test/selftest.js",
+    "doctor": "node src/index.js --once /doctor",
+    "once": "node src/index.js --once",
+    "test": "node test/unit.js",
+    "deps": "node src/index.js --once /deps"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "license": "UNLICENSED"
+}

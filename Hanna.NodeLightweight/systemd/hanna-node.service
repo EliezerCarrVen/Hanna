@@ -1,0 +1,19 @@
+[Unit]
+Description=Hanna NodeLightweight portable runtime
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/hanna/Hanna.NodeLightweight
+ExecStart=/usr/bin/npm start
+Environment=HANNA_DRY_RUN=true
+Environment=HANNA_DATA_DIR=/var/lib/hanna/HannaData
+Restart=on-failure
+User=hanna
+Group=hanna
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+const readline = require('readline'); const { StartupService } = require('./services/startupService'); const { CommandRouter } = require('./cli/commandRouter');
+async function main() { new StartupService().ensureDataLayout(); const router = new CommandRouter(); const args = process.argv.slice(2); const onceIndex = args.indexOf('--once'); if (onceIndex >= 0) { const command = args.slice(onceIndex + 1).join(' ') || '/status'; console.log(JSON.stringify(await router.handle(command), null, 2)); return; }
+  console.log('Hanna.NodeLightweight listo. Escribe /help o /salir.'); const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: 'hanna> ' }); rl.prompt(); rl.on('line', async line => { const out = await router.handle(line); console.log(typeof out === 'string' ? out : JSON.stringify(out, null, 2)); if (line.trim() === '/salir') rl.close(); else rl.prompt(); }); }
+if (require.main === module) main().catch(e => { console.error(e); process.exit(1); });
+module.exports = { main };

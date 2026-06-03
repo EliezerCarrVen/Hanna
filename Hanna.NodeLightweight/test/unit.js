@@ -1,0 +1,13 @@
+const assert = require('assert'); const path = require('path'); const fs = require('fs'); const os = require('os');
+process.env.HANNA_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'hanna-node-unit-'));
+const { StartupService } = require('../src/services/startupService'); const { SecretFilterService } = require('../src/services/secretFilterService'); const { PathGuardService } = require('../src/services/pathGuardService'); const { AuditLogService } = require('../src/services/auditLogService'); const { ZeroLeakSanitizerService } = require('../src/services/zeroLeakSanitizerService'); const { IntentRouterService } = require('../src/services/intentRouterService'); const { WakeOnLanService } = require('../src/services/wakeOnLanService'); const { VaultEncryptionService } = require('../src/services/vaultEncryptionService'); const { JsonlStoreService } = require('../src/services/jsonlStoreService'); const { paths } = require('../src/core/paths');
+new StartupService().ensureDataLayout();
+assert(new SecretFilterService().redact('api_key=abc token=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ').includes('[REDACTED]'));
+const guard = new PathGuardService(); assert.strictEqual(guard.validate(path.join(paths.dataRoot, 'runtime', 'ok.txt')).ok, true); assert.strictEqual(guard.validate('../secret.txt').ok, false); assert.strictEqual(guard.validate(path.join(paths.dataRoot, '.env')).ok, false);
+const auditFile = path.join(paths.logs, 'unit-audit.log'); const audit = new AuditLogService(auditFile); audit.record({ command: '/unit', module: 'test', result: 'ok', dry_run: true }); audit.record({ command: '/unit2', module: 'test', result: 'ok', dry_run: true }); assert.strictEqual(audit.verify().ok, true);
+assert(new ZeroLeakSanitizerService().sanitize('email a@b.com ip 192.168.1.10 C:\\Users\\Eliezer token=abc').includes('[EMAIL]'));
+assert.strictEqual(new IntentRouterService().classify('publicar en mqtt'), 'mqtt');
+const wol = new WakeOnLanService(); assert.strictEqual(wol.isValidMac('00:11:22:33:44:55'), true); assert.strictEqual(wol.isValidMac('bad'), false);
+const vault = new VaultEncryptionService(); const enc = vault.encryptText('hola', 'pass'); assert.strictEqual(vault.decryptText(enc, 'pass'), 'hola');
+const store = new JsonlStoreService(path.join(paths.runtime, 'unit.jsonl')); store.append({ hello: 'world' }); assert.strictEqual(store.read(1)[0].hello, 'world');
+console.log('PASS unit tests');
