@@ -1,7 +1,7 @@
 {
   "name": "hanna-node-lightweight",
   "version": "0.1.0",
-  "description": "Hanna portable Node.js/JavaScript runtime for HP Mini 110 Debian 12 i386/x86.",
+  "description": "Hanna portable Node.js runtime for HP Mini i386",
   "main": "src/index.js",
   "type": "commonjs",
   "private": true,
@@ -11,7 +11,17 @@
     "doctor": "node src/index.js --once /doctor",
     "once": "node src/index.js --once",
     "test": "node test/unit.js",
-    "deps": "node src/index.js --once /deps"
+    "deps": "node src/index.js --once /deps",
+    "telegram": "node src/integrations/telegramBot.js",
+    "telegram:dry-run": "node src/integrations/telegramBot.js --dry-run",
+    "admin-web": "node src/integrations/adminWebServer.js",
+    "webchat": "node src/integrations/webChatServer.js",
+    "mobile-api": "node src/integrations/mobileApiServer.js",
+    "core": "node src/core/hannaCore.js",
+    "cli": "node src/cli/hannaCli.js",
+    "web": "node src/integrations/webCompactServer.js",
+    "all": "node src/core/runAll.js",
+    "all:dry-run": "node src/core/runAll.js --dry-run"
   },
   "engines": {
     "node": ">=18"
