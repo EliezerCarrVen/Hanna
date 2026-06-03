@@ -1,3 +1,5 @@
+const { loadEnvFile } = require("./utils/envLoader");
+loadEnvFile();
 const readline = require('readline');
 const { StartupService } = require('./services/startupService');
 const { CommandRouter } = require('./cli/commandRouter');
