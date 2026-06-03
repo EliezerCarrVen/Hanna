@@ -1,0 +1,16 @@
+[Unit]
+Description=Hanna NodeLightweight Core
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/hanna/Hanna.NodeLightweight
+Environment=HANNA_DRY_RUN=true
+ExecStart=/usr/bin/npm run core
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,2 +1,16 @@
-const commands = ['/help','/status','/doctor','/selftest','/deps','/memoria prueba','/memoria buscar TEXTO','/codigo prueba','/codigo buscar TEXTO','/codigo listar','/codigo estado','/summary','/summary regenerar','/indexar','/indice estado','/vault estado','/vault crear NOMBRE','/vault listar','/vault importar RUTA','/vault verificar','/auditoria','/auditoria verificar','/modulos','/zeroleak TEXTO','/intencion TEXTO','/nas estado','/nas indexar','/nas buscar TEXTO','/mqtt estado','/mqtt publicar TOPIC MENSAJE','/wol estado','/wol probar MAC','/wol enviar MAC','/clamav estado','/clamav escanear RUTA','/docker estado','/nodered estado','/nodered ping','/serverless estado','/sistema doctor','/ntp estado','/ip estado','/salir'];
+const commands = [
+  '/help','/status','/doctor','/diagnostico','/selftest','/deps',
+  '/memoria prueba','/memoria guardar TEXTO','/memoria buscar TEXTO','/memoria ultimos','/memoria estado',
+  '/codigo prueba','/codigo buscar TEXTO','/codigo listar','/codigo estado',
+  '/summary','/summary regenerar','/indexar','/indice estado','/obsidian estado','/obsidian indexar','/obsidian buscar TEXTO','/obsidian guardar TITULO :: CONTENIDO','/graphifyy guardar TEXTO','/graphifyy buscar TEXTO',
+  '/motor actual','/motor estado','/motor cambiar NOMBRE','/fase actual','/fase estado','/fase cambiar NOMBRE',
+  '/vault estado','/vault crear NOMBRE','/vault listar','/vault importar RUTA','/vault verificar',
+  '/auditoria','/auditoria verificar','/modulos','/zeroleak TEXTO','/intencion TEXTO',
+  '/nas estado','/nas indexar','/nas buscar TEXTO','/mqtt estado','/mqtt publicar TOPIC MENSAJE',
+  '/spotify estado','/spotify auth estado','/spotify reproducir TEXTO','/spotify pausar','/spotify siguiente','/spotify anterior','/spotify buscar TEXTO',
+  '/voz estado','/voz decir TEXTO','/escuchar SEGUNDOS RUTA','/pantalla estado','/pantalla capturar RUTA','/analizar_pantalla RUTA',
+  '/wol estado','/wol probar MAC','/wol enviar MAC','/clamav estado','/clamav escanear RUTA',
+  '/docker estado','/nodered estado','/nodered ping','/serverless estado','/sistema doctor','/emocion estado','/reaccion estado','/web estado','/telegram estado','/ia estado',
+  '/ntp estado','/ip estado','/json COMANDO','/salir'
+];
 module.exports = { commands };

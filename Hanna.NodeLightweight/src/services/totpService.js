@@ -8,5 +8,6 @@ class TotpService {
     return String(code).padStart(digits, '0');
   }
   current(secret = config.totpSecret) { if (!secret) return { status: 'missing_configuration' }; return { status: 'ok', code: this.hotp(secret, Math.floor(Date.now() / 30000)) }; }
+  verify(code, secret = config.totpSecret, window = 1) { if (!secret) return { status: 'missing_configuration' }; const counter = Math.floor(Date.now() / 30000); for (let i = -window; i <= window; i++) if (this.hotp(secret, counter + i) === String(code)) return { status: 'ok', valid: true }; return { status: 'ok', valid: false }; }
 }
 module.exports = { TotpService };
