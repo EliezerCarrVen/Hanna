@@ -1,0 +1,3 @@
+const fs = require('fs'); const { paths } = require('../core/paths'); const { FlatFileMemoryService } = require('./flatFileMemoryService');
+class RollingSummaryService { read() { return fs.existsSync(paths.lastSummary) ? fs.readFileSync(paths.lastSummary, 'utf8') : ''; } regenerate() { const memories = new FlatFileMemoryService().recent(20); const text = `# Hanna rolling summary\n\nActualizado: ${new Date().toISOString()}\n\nEntradas recientes: ${memories.length}\n`; fs.writeFileSync(paths.lastSummary, text); return { status: 'ok', file: paths.lastSummary }; } }
+module.exports = { RollingSummaryService };

@@ -109,3 +109,6 @@ HannaWebUI/build/
 HannaData/
 
 Hanna.Lightweight/appsettings.local.json
+Hanna.NodeLightweight/.env
+Hanna.NodeLightweight/node_modules/
+Hanna.NodeLightweight/.runtime/
