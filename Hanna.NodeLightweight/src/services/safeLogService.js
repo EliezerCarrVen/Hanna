@@ -1,0 +1,3 @@
+const fs = require('fs'); const { paths } = require('../core/paths'); const { ensureFile } = require('../utils/fsSafe'); const { ZeroLeakSanitizerService } = require('./zeroLeakSanitizerService');
+class SafeLogService { constructor(file = paths.lightweightLog) { this.file = file; this.sanitizer = new ZeroLeakSanitizerService(); ensureFile(file); } write(message, meta = {}) { const entry = { timestamp: new Date().toISOString(), message: this.sanitizer.sanitize(message), meta: JSON.parse(JSON.stringify(meta, (k, v) => /token|secret|password|key/i.test(k) ? '[REDACTED]' : v)) }; fs.appendFileSync(this.file, JSON.stringify(entry) + '\n'); return entry; } }
+module.exports = { SafeLogService };

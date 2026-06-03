@@ -11,7 +11,12 @@
     "doctor": "node src/index.js --once /doctor",
     "once": "node src/index.js --once",
     "test": "node test/unit.js",
-    "deps": "node src/index.js --once /deps"
+    "deps": "node src/index.js --once /deps",
+    "telegram": "node src/integrations/telegramBot.js",
+    "telegram:dry-run": "node src/integrations/telegramBot.js --dry-run",
+    "admin-web": "node src/integrations/adminWebServer.js",
+    "webchat": "node src/integrations/webChatServer.js",
+    "mobile-api": "node src/integrations/mobileApiServer.js"
   },
   "engines": {
     "node": ">=18"

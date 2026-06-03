@@ -1,233 +1,204 @@
 const { spawnSync } = require('child_process');
-const os = require('os');
 
 const DEPENDENCIES = {
   node: {
-    windows: ['node.exe', 'node'],
-    linux: ['node'],
-    versionArgs: ['--version'],
-    suggestion_debian12_i386: 'apt install nodejs',
-    suggestion_windows: 'Instalar Node.js o agregar node.exe al PATH'
+    debian: 'sudo apt install nodejs',
+    windows: 'Instalar Node.js LTS desde https://nodejs.org/ o usar winget install OpenJS.NodeJS.LTS',
+    candidates: ['node', 'node.exe'],
+    version: [['node', ['--version']]]
   },
   npm: {
-    windows: ['npm.cmd', 'npm.exe', 'npm'],
-    linux: ['npm'],
-    versionArgs: ['--version'],
-    suggestion_debian12_i386: 'apt install npm',
-    suggestion_windows: 'Instalar npm con Node.js o agregar npm.cmd al PATH'
+    debian: 'sudo apt install npm',
+    windows: 'npm se instala junto con Node.js; verifica que npm.cmd esté en PATH',
+    candidates: ['npm', 'npm.cmd', 'npm.exe', 'npm.bat'],
+    version: [['npm', ['--version']], ['npm.cmd', ['--version']]]
   },
   git: {
-    windows: ['git.exe', 'git.cmd', 'git'],
-    linux: ['git'],
-    versionArgs: ['--version'],
-    suggestion_debian12_i386: 'apt install git',
-    suggestion_windows: 'Instalar Git for Windows o agregar git.exe al PATH'
+    debian: 'sudo apt install git',
+    windows: 'Instalar Git for Windows o usar winget install Git.Git',
+    candidates: ['git', 'git.exe', 'git.cmd'],
+    version: [['git', ['--version']]]
   },
   rg: {
-    windows: ['rg.exe', 'rg'],
-    linux: ['rg'],
-    versionArgs: ['--version'],
-    suggestion_debian12_i386: 'apt install ripgrep',
-    suggestion_windows: 'Instalar ripgrep o agregar rg.exe al PATH'
+    debian: 'sudo apt install ripgrep',
+    windows: 'Instalar ripgrep o usar winget install BurntSushi.ripgrep.MSVC',
+    candidates: ['rg', 'rg.exe'],
+    version: [['rg', ['--version']]]
   },
   mosquitto: {
-    windows: ['mosquitto.exe', 'mosquitto'],
-    linux: ['mosquitto'],
-    versionArgs: ['-h'],
-    suggestion_debian12_i386: 'apt install mosquitto mosquitto-clients',
-    suggestion_windows: 'Instalar Mosquitto para Windows o usar un broker MQTT remoto'
+    debian: 'sudo apt install mosquitto-clients mosquitto',
+    windows: 'Instalar Mosquitto para Windows o usar un broker MQTT remoto configurado',
+    candidates: ['mosquitto', 'mosquitto.exe'],
+    version: [['mosquitto', ['--help']]]
   },
   docker: {
-    windows: ['docker.exe', 'docker'],
-    linux: ['docker'],
-    versionArgs: ['--version'],
-    suggestion_debian12_i386: 'apt install docker.io',
-    suggestion_windows: 'Instalar Docker Desktop si el equipo lo soporta'
+    debian: 'sudo apt install docker.io',
+    windows: 'Instalar Docker Desktop; en HP Mini i386 normalmente dejar este módulo en dry-run',
+    candidates: ['docker', 'docker.exe'],
+    version: [['docker', ['--version']]]
   },
   clamscan: {
-    windows: ['clamscan.exe', 'clamscan'],
-    linux: ['clamscan'],
-    versionArgs: ['--version'],
-    suggestion_debian12_i386: 'apt install clamav',
-    suggestion_windows: 'Instalar ClamAV para Windows o usar ClamAV en Debian'
+    debian: 'sudo apt install clamav',
+    windows: 'Instalar ClamAV for Windows o dejar el módulo como missing_dependency',
+    candidates: ['clamscan', 'clamscan.exe'],
+    version: [['clamscan', ['--version']]]
   },
   'node-red': {
-    windows: ['node-red.cmd', 'node-red.exe', 'node-red'],
-    linux: ['node-red'],
-    versionArgs: ['--version'],
-    suggestion_debian12_i386: 'npm install -g --unsafe-perm node-red',
-    suggestion_windows: 'npm install -g node-red'
+    debian: 'sudo npm install -g --unsafe-perm node-red',
+    windows: 'npm install -g node-red',
+    candidates: ['node-red', 'node-red.cmd', 'node-red.exe', 'node-red.bat'],
+    version: [['node-red', ['--version']], ['node-red.cmd', ['--version']]]
   },
   curl: {
-    windows: ['curl.exe', 'curl'],
-    linux: ['curl'],
-    versionArgs: ['--version'],
-    suggestion_debian12_i386: 'apt install curl',
-    suggestion_windows: 'Usar curl incluido en Windows o instalarlo'
+    debian: 'sudo apt install curl',
+    windows: 'curl suele venir con Windows 10/11; si falta, instala curl o Git for Windows',
+    candidates: ['curl', 'curl.exe'],
+    version: [['curl', ['--version']]]
   },
   ping: {
-    windows: ['ping.exe', 'ping'],
-    linux: ['ping'],
-    versionArgs: ['-V'],
-    suggestion_debian12_i386: 'apt install iputils-ping',
-    suggestion_windows: 'ping viene incluido con Windows'
+    debian: 'sudo apt install iputils-ping',
+    windows: 'ping viene incluido con Windows',
+    candidates: ['ping', 'ping.exe'],
+    version: [['ping', process.platform === 'win32' ? ['/?'] : ['-V']]]
   },
   systemctl: {
-    windows: ['systemctl'],
-    linux: ['systemctl'],
-    systemdOnly: true,
-    versionArgs: ['--version'],
-    suggestion_debian12_i386: 'apt install systemd',
-    suggestion_windows: 'No aplica en Windows; se usa Service Control Manager'
+    debian: 'sudo apt install systemd',
+    windows: 'No aplica en Windows; systemd solo se usa en Linux',
+    windowsNotApplicable: true,
+    candidates: ['systemctl'],
+    version: [['systemctl', ['--version']]]
   },
   timedatectl: {
-    windows: ['timedatectl'],
-    linux: ['timedatectl'],
-    systemdOnly: true,
-    versionArgs: ['--version'],
-    suggestion_debian12_i386: 'apt install systemd',
-    suggestion_windows: 'No aplica en Windows; revisar hora desde Configuración o PowerShell'
+    debian: 'sudo apt install systemd',
+    windows: 'No aplica en Windows; timedatectl solo se usa en Linux/systemd',
+    windowsNotApplicable: true,
+    candidates: ['timedatectl'],
+    version: [['timedatectl', ['--version']]]
   },
   ip: {
-    windows: ['ip.exe', 'ip'],
-    linux: ['ip'],
-    versionArgs: ['-V'],
-    suggestion_debian12_i386: 'apt install iproute2',
-    suggestion_windows: 'No aplica normalmente en Windows; usar ipconfig'
+    debian: 'sudo apt install iproute2',
+    windows: 'No aplica igual en Windows; usar ipconfig para diagnóstico local',
+    candidates: ['ip', 'ip.exe'],
+    version: [['ip', ['-V']]]
   },
   hostname: {
-    windows: ['hostname.exe', 'hostname'],
-    linux: ['hostname'],
-    versionArgs: [],
-    suggestion_debian12_i386: 'apt install hostname',
-    suggestion_windows: 'hostname viene incluido con Windows'
+    debian: 'sudo apt install hostname',
+    windows: 'hostname viene incluido con Windows',
+    candidates: ['hostname', 'hostname.exe'],
+    version: [['hostname', []]]
   }
 };
 
-function isWindows() {
-  return process.platform === 'win32';
-}
-
-function run(command, args = [], options = {}) {
-  const useShell = options.shell ?? (isWindows() && /\.(cmd|bat)$/i.test(command));
-  const result = spawnSync(command, args, {
-    encoding: 'utf8',
-    timeout: options.timeout || 2500,
-    maxBuffer: 1024 * 1024,
-    shell: useShell,
-    windowsHide: true
-  });
-
-  return {
-    status: result.status,
-    stdout: result.stdout || '',
-    stderr: result.stderr || '',
-    error: result.error ? result.error.message : ''
-  };
-}
-
-function firstLine(text) {
-  return String(text || '').split(/\r?\n/).map(line => line.trim()).find(Boolean) || '';
-}
-
-function findWindowsExecutable(candidates) {
-  for (const candidate of candidates) {
-    const found = run('where.exe', [candidate], { shell: false });
-    if (found.status === 0) {
-      const line = firstLine(found.stdout);
-      if (line) return line;
-    }
-  }
-
-  return '';
-}
-
-function findLinuxExecutable(candidates) {
-  for (const candidate of candidates) {
-    const escaped = candidate.replace(/'/g, "'\\''");
-    const found = run('/bin/sh', ['-lc', `command -v '${escaped}' || which '${escaped}'`], { shell: false });
-    if (found.status === 0) {
-      const line = firstLine(found.stdout);
-      if (line) return line;
-    }
-  }
-
-  return '';
-}
-
-function detectExecutable(name, metadata) {
-  if (name === 'node' && process.execPath) {
-    return process.execPath;
-  }
-
-  return isWindows()
-    ? findWindowsExecutable(metadata.windows || [name])
-    : findLinuxExecutable(metadata.linux || [name]);
-}
-
-function detectVersion(name, executable, metadata) {
-  if (name === 'node') {
-    return process.version;
-  }
-
-  const args = metadata.versionArgs || ['--version'];
-  const result = run(executable || name, args, { timeout: 3000 });
-  if (result.status === 0 || result.stdout || result.stderr) {
-    return firstLine(result.stdout || result.stderr);
-  }
-
-  return '';
-}
-
 class DependencyCheckerService {
-  checkOne(command) {
-    const metadata = DEPENDENCIES[command] || {
-      windows: [command],
-      linux: [command],
-      versionArgs: ['--version'],
-      suggestion_debian12_i386: 'instalar paquete Debian equivalente',
-      suggestion_windows: 'instalar herramienta equivalente para Windows'
+  constructor(options = {}) {
+    this.platform = options.platform || process.platform;
+    this.execPath = options.execPath || process.execPath;
+    this.spawn = options.spawn || spawnSync;
+  }
+
+  checkOne(name) {
+    const dependency = DEPENDENCIES[name] || {
+      debian: 'Instalar paquete Debian 12 i386 equivalente',
+      windows: 'Instalar herramienta equivalente para Windows',
+      candidates: [name],
+      version: [[name, ['--version']]]
     };
 
-    if (isWindows() && metadata.systemdOnly) {
+    if (this.platform === 'win32' && dependency.windowsNotApplicable) {
       return {
-        name: command,
+        name,
         status: 'not_applicable',
         found: false,
-        message: `${command} es una herramienta de systemd/Linux y no aplica en Windows`,
-        suggestion_debian12_i386: metadata.suggestion_debian12_i386,
-        suggestion_windows: metadata.suggestion_windows,
-        suggestion: metadata.suggestion_debian12_i386
+        message: `${name} no aplica en Windows; se usa solo en Linux/systemd.`,
+        suggestion: dependency.debian,
+        suggestion_debian12_i386: dependency.debian,
+        suggestion_windows: dependency.windows
       };
     }
 
-    const executable = detectExecutable(command, metadata);
-    if (!executable) {
+    const path = this.findExecutable(name, dependency);
+    const version = this.getVersion(name, dependency, path);
+    const found = Boolean(path || version);
+
+    if (!found) {
       return {
-        name: command,
+        name,
         status: 'missing_dependency',
         found: false,
-        suggestion_debian12_i386: metadata.suggestion_debian12_i386,
-        suggestion_windows: metadata.suggestion_windows,
-        suggestion: metadata.suggestion_debian12_i386
+        suggestion: dependency.debian,
+        suggestion_debian12_i386: dependency.debian,
+        suggestion_windows: dependency.windows
       };
     }
 
     return {
-      name: command,
+      name,
       status: 'found',
       found: true,
-      path: executable,
-      version: detectVersion(command, executable, metadata),
-      suggestion_debian12_i386: metadata.suggestion_debian12_i386,
-      suggestion_windows: metadata.suggestion_windows,
-      suggestion: metadata.suggestion_debian12_i386
+      path: path || '',
+      version: version || '',
+      suggestion: dependency.debian,
+      suggestion_debian12_i386: dependency.debian,
+      suggestion_windows: dependency.windows
     };
   }
 
   checkAll() {
-    return Object.keys(DEPENDENCIES).map(dep => this.checkOne(dep));
+    return Object.keys(DEPENDENCIES).map(name => this.checkOne(name));
+  }
+
+  findExecutable(name, dependency) {
+    if (name === 'node' && this.execPath) return this.execPath;
+    const candidates = dependency.candidates || [name];
+    if (this.platform === 'win32') return this.findWindows(candidates);
+    return this.findUnix(candidates[0] || name);
+  }
+
+  findWindows(candidates) {
+    for (const candidate of candidates) {
+      const result = this.spawn('where.exe', [candidate], { encoding: 'utf8', timeout: 2500, windowsHide: true });
+      if (result.status === 0 && result.stdout) return result.stdout.split(/\r?\n/).map(x => x.trim()).find(Boolean) || '';
+    }
+    return '';
+  }
+
+  findUnix(command) {
+    const commandV = this.spawn('sh', ['-c', `command -v ${shellQuote(command)}`], { encoding: 'utf8', timeout: 2500 });
+    if (commandV.status === 0 && commandV.stdout) return firstLine(commandV.stdout);
+
+    const which = this.spawn('sh', ['-c', `if command -v which >/dev/null 2>&1; then which ${shellQuote(command)}; fi`], { encoding: 'utf8', timeout: 2500 });
+    if (which.status === 0 && which.stdout) return firstLine(which.stdout);
+    return '';
+  }
+
+  getVersion(name, dependency, foundPath) {
+    const versionCommands = dependency.version || [[name, ['--version']]];
+    const attempts = [];
+
+    if (name === 'node' && this.execPath) attempts.push([this.execPath, ['--version']]);
+    if (foundPath) attempts.push([foundPath, versionCommands[0][1] || ['--version']]);
+    attempts.push(...versionCommands);
+
+    for (const [command, args] of attempts) {
+      const result = this.spawn(command, args, {
+        encoding: 'utf8',
+        timeout: 3000,
+        windowsHide: true,
+        shell: this.platform === 'win32' && /\.(cmd|bat)$/i.test(command)
+      });
+      const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
+      if (result.status === 0 || output) return firstLine(output);
+    }
+    return '';
   }
 }
 
-module.exports = { DependencyCheckerService };
+function firstLine(text) {
+  return String(text || '').split(/\r?\n/).map(x => x.trim()).find(Boolean) || '';
+}
+
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, `'\\''`)}'`;
+}
+
+module.exports = { DependencyCheckerService, DEPENDENCIES };
