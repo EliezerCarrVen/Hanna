@@ -1,0 +1,12 @@
+[
+  {
+    "id": "hanna-status-inject",
+    "type": "inject",
+    "name": "Hanna status poll",
+    "props": [{ "p": "payload" }],
+    "payload": "/status",
+    "payloadType": "str",
+    "wires": [["hanna-debug"]]
+  },
+  { "id": "hanna-debug", "type": "debug", "name": "Hanna debug", "active": true, "tosidebar": true, "wires": [] }
+]
