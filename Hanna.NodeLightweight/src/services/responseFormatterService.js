@@ -14,6 +14,11 @@ class ResponseFormatterService {
     if (command.startsWith('/doctor') || command.startsWith('/diagnostico')) return this.doctor(data);
     if (command.startsWith('/deps')) return this.dependencies(data);
     if (command.startsWith('/spotify')) return this.spotify(data);
+    if (command.startsWith('/obsidian') || command.startsWith('/graphifyy')) return this.obsidian(data);
+    if (command.startsWith('/emocion') || command.startsWith('/reaccion')) return this.emotion(data);
+    if (command.startsWith('/ia')) return this.ai(data);
+    if (command.startsWith('/telegram')) return this.serviceStatus('Telegram', data);
+    if (command.startsWith('/web')) return this.serviceStatus('Web compacta', data);
     if (command.startsWith('/auditoria verificar')) return this.auditVerify(data);
     if (command.startsWith('/auditoria')) return this.audit(data);
     if (command.startsWith('/modulos')) return this.modules(data);
@@ -24,6 +29,7 @@ class ResponseFormatterService {
     if (command.startsWith('/motor')) return this.engine(data);
     if (command.startsWith('/fase')) return this.phase(data);
     if (command.startsWith('/help')) return this.help(data);
+    if (data && data.type === 'general_qa') return this.generalQa(data);
     if (data && data.status === 'unknown_command') return 'Te leí, pero no pude convertir eso en una acción segura. Puedes decir: estado, diagnóstico, qué puedes hacer, guarda esto en memoria, o busca en memoria.';
     if (data && data.status === 'error') return 'Tuve un problema interno procesando eso, pero ya lo registré sin exponer detalles técnicos. Prueba de nuevo o ejecuta diagnóstico.';
     return this.generic(data);
@@ -103,6 +109,26 @@ class ResponseFormatterService {
     if (data.status === 'service_unavailable') return `Spotify no respondió correctamente (${data.error || 'service_unavailable'}). Revisa red, sesión Premium/dispositivo activo y credenciales.`;
     return `Spotify estado: ${data.status || 'desconocido'}.\nModo seguro: ${data.dry_run ? 'dry-run' : 'operativo'}.`;
   }
+
+  generalQa(data = {}) {
+    if (data.status === 'ok') return data.answer || 'Encontré una respuesta con el contexto local de Hanna.';
+    return data.message || 'Puedo responder eso cuando configures un motor IA. Falta configurar GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY u OLLAMA_BASE_URL.';
+  }
+
+  obsidian(data = {}) {
+    if (data.type === 'obsidian_search') {
+      const items = data.items || [];
+      if (!items.length) return `No encontré coincidencias en Obsidian para “${data.query || ''}”.`;
+      return 'Encontré esto en Obsidian:\n' + items.slice(0, 6).map((x, i) => `${i + 1}. ${x.relative || x.path}: ${x.preview || ''}`.slice(0, 220)).join('\n');
+    }
+    if (data.status === 'ok' && data.file) return `Guardé la nota en Obsidian.\nÁrea: ${data.area || 'conocimiento'}\nResumen: ${data.summary || data.title || ''}`;
+    if (data.root) return `Obsidian/RAG activo.\nBóveda: ${this.shortPath(data.root)}\nNotas: ${data.notes || 0}\nÁreas: ${(data.areas || []).join(', ')}`;
+    return this.generic(data);
+  }
+
+  emotion(data = {}) { return `Estado emocional de Hanna: ${data.mood || 'enfocada'}.\nEnergía: ${data.energy ?? 'n/d'}.\nConfianza: ${data.confidence ?? 'n/d'}.\nTono: ${data.tone || 'cálido y directo'}.\nÚltima reacción: ${data.last_reaction || 'lista para ayudar'}.`; }
+  ai(data = {}) { return `IA de Hanna: ${data.status}.\nMotor activo: ${data.active || 'local_fallback'}.\nProveedores: ${(data.providers || []).map(p => `${p.provider}:${p.status}`).join(', ') || 'sin proveedores configurados'}.`; }
+  serviceStatus(name, data = {}) { return `${name}: ${data.status || 'desconocido'}.\nServicio permanente: ${data.always_on || 'systemd opcional'}.`; }
 
   memorySaved(data = {}) { return `Listo. Guardé esa memoria real de forma local y sanitizada.\nArchivo/registro: ${this.shortPath(data.file || data.path || 'short_memory.jsonl')}`; }
   memorySearch(data = {}) {

@@ -4,9 +4,11 @@ const { CommandRouter } = require('../cli/commandRouter');
 const { AuditLogService } = require('../services/auditLogService');
 const { SafeLogService } = require('../services/safeLogService');
 const { TelegramSecurityService } = require('../services/telegramSecurityService');
+const { loadEnvFile } = require('../utils/envLoader');
 
 class TelegramBotIntegration {
   constructor(options = {}) {
+    loadEnvFile();
     this.token = options.token || process.env.TELEGRAM_BOT_TOKEN || '';
     this.adminId = options.adminId || process.env.TELEGRAM_ADMIN_ID || '';
     this.dryRun = options.dryRun !== undefined ? options.dryRun : process.env.HANNA_TELEGRAM_DRY_RUN === 'true';

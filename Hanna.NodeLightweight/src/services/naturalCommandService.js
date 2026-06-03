@@ -27,10 +27,19 @@ class NaturalCommandService {
     if (/estado del motor|motor estado/.test(simplified)) return hit('/motor estado', 'motor');
     if (/fase actual/.test(simplified)) return hit('/fase actual', 'fase');
     if (/estado de fase|fase estado/.test(simplified)) return hit('/fase estado', 'fase');
+    const obsSave = originalText.match(/^(guarda esto en obsidian:|guarda en obsidian|guarda este contexto)\s*(.+)$/i);
+    if (obsSave) return hit(`/obsidian guardar ${obsSave[2].trim()}`, 'obsidian');
+    const obsSearch = originalText.match(/^(busca en obsidian|busca obsidian)\s*:??\s*(.+)$/i);
+    if (obsSearch) return hit(`/obsidian buscar ${obsSearch[2].trim()}`, 'obsidian');
+    if (/^(estado emocional|como te sientes|cómo te sientes)$/.test(simplified)) return hit('/emocion estado', 'emocion');
+    if (/^(estado telegram|telegram estado)$/.test(simplified)) return hit('/telegram estado', 'telegram');
+    if (/^(estado ia|ia estado|estado de ia)$/.test(simplified)) return hit('/ia estado', 'ia');
+    if (/^(abre web|web estado|estado web)$/.test(simplified)) return hit('/web estado', 'web');
     const save = originalText.match(/^(recuerda que|guarda esto en memoria:|guarda esto:|guarda en memoria|memoriza)\s*(.+)$/i);
     if (save) return hit(`/memoria guardar ${save[2].trim()}`, 'memoria');
     const search = originalText.match(/^(busca en memoria|busca memoria|qué recuerdas de|que recuerdas de)\s*:??\s*(.+)$/i);
     if (search) return hit(`/memoria buscar ${search[2].trim()}`, 'memoria');
+    if (/^(busca|buscar|que es|qué es|explicame|explícame|investiga|dime|que sabes de|qué sabes de)\b/.test(simplified)) return { matched: true, normalizedCommand: originalText, command: originalText, intent: 'general_qa', confidence: 0.9, originalText, type: 'conversation', action: 'general_qa', text: originalText };
     return { matched: false, normalizedCommand: '', intent: this.intentRouter.classify(originalText), confidence: 0.25, originalText, type: 'conversation', action: 'fallback', text: originalText };
   }
   simplify(text) { return String(text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[¿?¡!.,;]+/g, ' ').replace(/\s+/g, ' ').trim(); }

@@ -28,6 +28,10 @@ const { PhaseStateService } = require('../services/phaseStateService');
 const { MemoryService } = require('../services/memoryService');
 const { LlmRouterService } = require('../services/llmRouterService');
 const { SpotifyService } = require('../services/spotifyService');
+const { ObsidianVaultService } = require('../services/obsidianVaultService');
+const { KnowledgeIndexService } = require('../services/knowledgeIndexService');
+const { EmotionStateService } = require('../services/emotionStateService');
+const { ReactionService } = require('../services/reactionService');
 
 class CommandRouter {
   constructor() {
@@ -83,6 +87,12 @@ class CommandRouter {
     if (cmd === '/summary') return new RollingSummaryService().read();
     if (cmd === '/indexar') return new VaultIndexService().index();
     if (cmd === '/indice' && sub === 'estado') return new VaultIndexService().status();
+    if (cmd === '/obsidian' && sub === 'estado') return new ObsidianVaultService().status();
+    if (cmd === '/obsidian' && sub === 'indexar') return new KnowledgeIndexService().index();
+    if (cmd === '/obsidian' && sub === 'buscar') return { type: 'obsidian_search', query: text, items: new ObsidianVaultService().search(text, 10) };
+    if (cmd === '/obsidian' && sub === 'guardar') { const parts = text.split('::'); return new ObsidianVaultService().createNote((parts[0] || 'nota').trim(), (parts.slice(1).join('::') || parts[0] || '').trim(), { area: 'conocimiento', tags: ['hanna', 'obsidian'] }); }
+    if (cmd === '/graphifyy' && sub === 'guardar') return new ObsidianVaultService().createNote('graphifyy', text, { area: 'graphifyy', tags: ['graphifyy'] });
+    if (cmd === '/graphifyy' && sub === 'buscar') return { type: 'obsidian_search', query: text, items: new ObsidianVaultService().search(text, 10).filter(x => String(x.relative || '').includes('graphifyy')) };
     if (cmd === '/vault' && sub === 'estado') return new MarkdownVaultService().status();
     if (cmd === '/vault' && sub === 'crear') return new MarkdownVaultService().createNote('bovedas', text || 'nueva-boveda', '');
     if (cmd === '/vault' && sub === 'listar') return new MarkdownVaultService().list();
@@ -121,6 +131,11 @@ class CommandRouter {
     if (cmd === '/motor' && sub === 'cambiar') return { status: 'dry_run', dry_run: true, requested: text, message: 'Cambio de motor no persistido en modo seguro.' };
     if (cmd === '/fase' && (sub === 'actual' || sub === 'estado')) return new PhaseStateService().current();
     if (cmd === '/fase' && sub === 'cambiar') return { status: 'dry_run', dry_run: true, requested: text, message: 'Cambio de fase no persistido en modo seguro.' };
+    if (cmd === '/emocion' && sub === 'estado') return new EmotionStateService().getState();
+    if (cmd === '/reaccion' && sub === 'estado') return new ReactionService().status();
+    if (cmd === '/ia' && sub === 'estado') return new LlmRouterService().status();
+    if (cmd === '/telegram' && sub === 'estado') return { status: process.env.TELEGRAM_BOT_TOKEN ? 'configured' : 'missing_configuration', service: 'telegram', always_on: 'systemd:hanna-telegram.service' };
+    if (cmd === '/web' && sub === 'estado') return { status: 'configured', service: 'web', port: Number(process.env.HANNA_WEB_PORT || 8787), always_on: 'systemd:hanna-web.service' };
     if (cmd === '/salir') return { status: 'bye' };
     return { human: await new LlmRouterService().respondLocal(input), data: { status: 'local_fallback', input } };
   }

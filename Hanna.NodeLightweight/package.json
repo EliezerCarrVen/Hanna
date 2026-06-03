@@ -16,7 +16,12 @@
     "telegram:dry-run": "node src/integrations/telegramBot.js --dry-run",
     "admin-web": "node src/integrations/adminWebServer.js",
     "webchat": "node src/integrations/webChatServer.js",
-    "mobile-api": "node src/integrations/mobileApiServer.js"
+    "mobile-api": "node src/integrations/mobileApiServer.js",
+    "core": "node src/core/hannaCore.js",
+    "cli": "node src/cli/hannaCli.js",
+    "web": "node src/integrations/webCompactServer.js",
+    "all": "node src/core/runAll.js",
+    "all:dry-run": "node src/core/runAll.js --dry-run"
   },
   "engines": {
     "node": ">=18"

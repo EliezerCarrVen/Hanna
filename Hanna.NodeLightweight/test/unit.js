@@ -1,6 +1,6 @@
 const assert = require('assert'); const path = require('path'); const fs = require('fs'); const os = require('os');
 process.env.HANNA_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'hanna-node-unit-'));
-const { StartupService } = require('../src/services/startupService'); const { DependencyCheckerService } = require('../src/services/dependencyCheckerService'); const { SecretFilterService } = require('../src/services/secretFilterService'); const { PathGuardService } = require('../src/services/pathGuardService'); const { AuditLogService } = require('../src/services/auditLogService'); const { ZeroLeakSanitizerService } = require('../src/services/zeroLeakSanitizerService'); const { IntentRouterService } = require('../src/services/intentRouterService'); const { WakeOnLanService } = require('../src/services/wakeOnLanService'); const { VaultEncryptionService } = require('../src/services/vaultEncryptionService'); const { JsonlStoreService } = require('../src/services/jsonlStoreService'); const { ResponseFormatterService } = require('../src/services/responseFormatterService'); const { CommandRouter } = require('../src/cli/commandRouter'); const { TelegramBotIntegration } = require('../src/integrations/telegramBot'); const { NaturalCommandService } = require('../src/services/naturalCommandService'); const { AdminWebServer } = require('../src/integrations/adminWebServer'); const { WebChatServer } = require('../src/integrations/webChatServer'); const { MobileApiServer } = require('../src/integrations/mobileApiServer'); const { LlmRouterService } = require('../src/services/llmRouterService'); const { GroqAdapterService } = require('../src/services/groqAdapterService'); const { GeminiAdapterService } = require('../src/services/geminiAdapterService'); const { OpenRouterAdapterService } = require('../src/services/openRouterAdapterService'); const { OllamaAdapterService } = require('../src/services/ollamaAdapterService'); const { MqttService } = require('../src/services/mqttService'); const { SpotifyService } = require('../src/services/spotifyService'); const { RbacService } = require('../src/services/rbacService'); const { TotpService } = require('../src/services/totpService'); const { paths } = require('../src/core/paths');
+const { StartupService } = require('../src/services/startupService'); const { DependencyCheckerService } = require('../src/services/dependencyCheckerService'); const { SecretFilterService } = require('../src/services/secretFilterService'); const { PathGuardService } = require('../src/services/pathGuardService'); const { AuditLogService } = require('../src/services/auditLogService'); const { ZeroLeakSanitizerService } = require('../src/services/zeroLeakSanitizerService'); const { IntentRouterService } = require('../src/services/intentRouterService'); const { WakeOnLanService } = require('../src/services/wakeOnLanService'); const { VaultEncryptionService } = require('../src/services/vaultEncryptionService'); const { JsonlStoreService } = require('../src/services/jsonlStoreService'); const { ResponseFormatterService } = require('../src/services/responseFormatterService'); const { CommandRouter } = require('../src/cli/commandRouter'); const { TelegramBotIntegration } = require('../src/integrations/telegramBot'); const { NaturalCommandService } = require('../src/services/naturalCommandService'); const { AdminWebServer } = require('../src/integrations/adminWebServer'); const { WebChatServer } = require('../src/integrations/webChatServer'); const { MobileApiServer } = require('../src/integrations/mobileApiServer'); const { LlmRouterService } = require('../src/services/llmRouterService'); const { GroqAdapterService } = require('../src/services/groqAdapterService'); const { GeminiAdapterService } = require('../src/services/geminiAdapterService'); const { OpenRouterAdapterService } = require('../src/services/openRouterAdapterService'); const { OllamaAdapterService } = require('../src/services/ollamaAdapterService'); const { MqttService } = require('../src/services/mqttService'); const { SpotifyService } = require('../src/services/spotifyService'); const { ObsidianVaultService } = require('../src/services/obsidianVaultService'); const { EmotionStateService } = require('../src/services/emotionStateService'); const { WebCompactServer } = require('../src/integrations/webCompactServer'); const { HannaCore } = require('../src/core/hannaCore'); const { RbacService } = require('../src/services/rbacService'); const { TotpService } = require('../src/services/totpService'); const { paths } = require('../src/core/paths');
 
 (async () => {
 new StartupService().ensureDataLayout();
@@ -36,6 +36,19 @@ assert((await router.run('qué puedes hacer')).includes('Puedo ayudarte'));
 const natural = new NaturalCommandService().normalize('  Qué   falta instalar?? '); assert.strictEqual(natural.matched, true); assert.strictEqual(natural.normalizedCommand, '/deps'); assert(natural.confidence > 0.5);
 assert((await router.run('guarda esto en memoria: prueba')).includes('Guardé'));
 assert((await router.run('busca en memoria prueba')).includes('memoria local'));
+const qaOut = await router.run('busca que es un llm'); assert(qaOut.includes('motor IA') || qaOut.includes('Obsidian'));
+assert((await router.run('qué es un llm')).includes('motor IA') || (await router.run('qué es un llm')).includes('Obsidian'));
+assert((await router.run('explícame qué es un llm')).includes('motor IA') || (await router.run('explícame qué es un llm')).includes('Obsidian'));
+assert((await router.run('guarda esto en obsidian: prueba :: contenido de prueba')).includes('Guardé la nota'));
+assert((await router.run('busca en obsidian prueba')).includes('Obsidian'));
+assert((await router.run('cómo te sientes')).includes('Estado emocional'));
+assert((await router.run('estado emocional')).includes('Estado emocional'));
+assert((await router.run('/obsidian estado')).includes('Obsidian/RAG activo'));
+assert((await router.run('/ia estado')).includes('IA de Hanna'));
+assert((await router.run('/telegram estado')).includes('Telegram'));
+assert((await router.run('/web estado')).includes('Web compacta'));
+assert.strictEqual(new ObsidianVaultService().status().status, 'ok');
+assert.strictEqual(new EmotionStateService().getState().status, 'ok');
 const formatter = new ResponseFormatterService();
 assert(!formatter.format({ command: '/status', data: { runtime: 'node', dry_run: true, modules: 1 } }, { mode: 'human' }).trim().startsWith('{'));
 assert(formatter.format({ ok: true }, { mode: 'json' }).trim().startsWith('{'));
@@ -48,6 +61,8 @@ await telegram.handleMessage({ text: 'hola', chat: { id: 123 }, from: { id: 456,
 assert.strictEqual((await new AdminWebServer({ router }).selfTest()).status, 'ok');
 assert.strictEqual((await new WebChatServer({ router }).selfTest()).status, 'ok');
 assert.strictEqual((await new MobileApiServer({ router }).selfTest()).status, 'ok');
+assert.strictEqual((await new WebCompactServer({ router }).selfTest()).status, 'ok');
+assert.strictEqual((await new HannaCore().start({ dryRun: true })).status, 'ok');
 assert.strictEqual(new GroqAdapterService().status().status, 'missing_configuration');
 assert.strictEqual(new GeminiAdapterService().status().status, 'missing_configuration');
 assert.strictEqual(new OpenRouterAdapterService().status().status, 'missing_configuration');

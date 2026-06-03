@@ -22,3 +22,14 @@
 ## Elementos críticos
 
 La experiencia crítica de Hanna como asistente NodeLightweight — Telegram texto, conversación natural, slash commands, ayuda, estado, diagnóstico, dependencias, auditoría, memoria, motor/fase, LLM adapters y HTTP mínimo para Admin/WebChat/Mobile — no queda en `missing_parity`. Lo restante está bloqueado solo por credenciales, dependencia externa, hardware o alcance de UI avanzada.
+
+## PR-10 verificación HP Mini runtime
+
+| Comportamiento | Estado | Prueba | Bloqueo real |
+|---|---|---|---|
+| Runtime headless separado de CLI | ported | `npm run core`, `npm run all:dry-run` | systemd requiere instalación local |
+| Telegram siempre activo | blocked_by_configuration | `npm run telegram:dry-run` | `TELEGRAM_BOT_TOKEN` faltante |
+| Web compacta con páginas | ported | `npm run web -- --self-test` | Ninguno crítico |
+| Obsidian/RAG guarda y busca | ported | `guarda esto en obsidian...`, `busca en obsidian...` | Ranking semántico avanzado requiere IA |
+| Preguntas generales no caen en fallback | ported | `busca que es un llm` | Respuesta factual requiere motor IA configurado |
+| Emociones/reacciones | ported | `hola`, `estado emocional` | Ajuste fino de personalidad |

@@ -2,12 +2,15 @@ const { PersonaService } = require('./personaService');
 const { FlatFileMemoryService } = require('./flatFileMemoryService');
 const { MarkdownVaultService } = require('./markdownVaultService');
 const { RollingSummaryService } = require('./rollingSummaryService');
+const { GeneralQaService } = require('./generalQaService');
+const { ReactionService } = require('./reactionService');
 
 class ConversationService {
-  constructor() { this.persona = new PersonaService(); }
+  constructor() { this.persona = new PersonaService(); this.reactions = new ReactionService(); }
   async respond(action, text, context = {}) {
-    if (action === 'greeting') return { human: this.persona.greeting(), data: { type: 'greeting' } };
+    if (action === 'greeting') return { human: this.reactions.greeting(), data: { type: 'greeting' } };
     if (action === 'capabilities') return { human: this.persona.capabilities(), data: { type: 'capabilities' } };
+    if (action === 'general_qa') return await new GeneralQaService().answer(text, context);
     return { human: this.persona.fallback(text), data: { type: 'fallback', text, source: context.source || 'cli' } };
   }
   saveMemory(text, actor) {

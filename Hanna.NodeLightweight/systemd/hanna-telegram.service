@@ -1,0 +1,15 @@
+[Unit]
+Description=Hanna NodeLightweight Telegram
+After=network-online.target hanna-core.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/hanna/Hanna.NodeLightweight
+ExecStart=/usr/bin/npm run telegram
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

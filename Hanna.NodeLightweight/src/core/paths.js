@@ -23,7 +23,7 @@ const paths = {
   securityLog: path.join(dataRoot, 'logs', 'security.log')
 };
 
-paths.vaultDirs = ['memoria', 'proyectos', 'sistema', 'inventario', 'tareas', 'codigo_cache', 'bovedas', 'perfiles', 'empresa']
+paths.vaultDirs = ['memoria', 'proyectos', 'sistema', 'inventario', 'tareas', 'codigo_cache', 'bovedas', 'perfiles', 'empresa', 'conversaciones', 'graphifyy', 'conocimiento', 'resumenes']
   .reduce((acc, name) => ({ ...acc, [name]: path.join(paths.vault, name) }), {});
 
 module.exports = { paths };

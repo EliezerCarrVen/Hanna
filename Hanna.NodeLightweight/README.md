@@ -75,3 +75,23 @@ Ahí se documenta qué comportamiento C# ya está portado, qué está parcial y 
 ## Spotify
 
 Hanna.NodeLightweight incluye un adapter Spotify ligero con `https` nativo. Usa `/spotify estado`, `/spotify auth estado`, `/spotify buscar TEXTO`, `/spotify reproducir TEXTO`, `/spotify pausar`, `/spotify siguiente` y `/spotify anterior`. En lenguaje natural acepta frases como `estado de spotify`, `pausa spotify` y `siguiente canción`. Si faltan credenciales OAuth reporta `blocked_by_configuration` y mantiene dry-run sin guardar ni loggear secretos.
+
+## Runtime siempre activo en HP Mini
+
+`node src/index.js` queda como chat local opcional. Para operación permanente usa procesos separados:
+
+- `npm run core`: inicia `hanna-core` headless (configuración, memoria, Obsidian, emociones, IA, auditoría y estado).
+- `npm run telegram`: inicia `hanna-telegram` por long polling usando `.env` local.
+- `npm run web`: inicia la web compacta en `HANNA_WEB_PORT` (8787 por defecto).
+- `npm run cli`: abre chat local.
+- `npm run all:dry-run`: prueba core, Telegram dry-run y web self-test sin acciones peligrosas.
+
+Para systemd en Debian 12 i386: revisa `systemd/hanna-core.service`, `systemd/hanna-telegram.service`, `systemd/hanna-web.service` y ejecuta `sudo scripts/install-services.sh` después de ajustar `WorkingDirectory` a la ruta real de instalación.
+
+## Web compacta
+
+`npm run web` expone páginas ligeras sin Express: `/`, `/chat`, `/status`, `/doctor`, `/memory`, `/obsidian`, `/emotions`, `/modules`, `/ai`, `/spotify`, `/telegram`, `/logs` y `/settings`. También expone endpoints `/api/health`, `/api/status`, `/api/doctor`, `/api/modules`, `/api/emotions`, `/api/obsidian/status`, `/api/chat`, `/api/command`, `/api/memory/search` y `/api/memory/save`.
+
+## Obsidian/RAG e IA
+
+Configura `HANNA_OBSIDIAN_VAULT_PATH` para usar una bóveda existente; si falta, Hanna usa `HannaData/vault`. Los comandos `/obsidian guardar`, `/obsidian buscar` y `/obsidian indexar` crean notas Markdown con frontmatter, buscan por `rg` si existe y hacen fallback por filesystem. Para preguntas generales (`busca qué es un LLM`, `explícame qué es...`) Hanna consulta primero Obsidian/RAG y luego `LlmRouterService`; si no hay motor configurado reporta las variables faltantes sin inventar respuesta.

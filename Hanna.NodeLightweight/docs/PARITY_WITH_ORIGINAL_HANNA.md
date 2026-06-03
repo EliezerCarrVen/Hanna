@@ -42,3 +42,14 @@ Esta auditoría usa la Hanna C# como especificación funcional para `Hanna.NodeL
 | TTS/voz/hotkeys | `TtsService`, `VoiceCommandService`, hotkeys | Voz/audio/atajos Windows | No aplicar por defecto en i386 | not_applicable_i386 | docs | Checklist | Solo si hardware/paquetes i386 lo permiten |
 | Skills Windows/escritorio | `DesktopSkill`, audio/media | Control PC Windows | No aplicable HP Mini Debian | not_applicable_i386 | docs | Checklist | Ninguno para i386 base |
 | NAS/MQTT/WOL/ClamAV/Docker/Node-RED | varios planes lightweight | Automatización opcional | Contratos seguros con dry-run/missing_dependency/config | partial | `mqttService.js`, `wakeOnLanService.js`, `nasIndexerService.js`, etc. | `/modulos`, `/doctor` | Integración real depende de paquetes/config/hardware |
+
+## Cierre PR-10: runtime siempre activo, web, Obsidian/RAG, IA y emociones
+
+| Original C# feature | Archivo C# | Qué hace realmente | Comportamiento esperado en Node | Estado Node | Archivo Node | Prueba que lo valida | Pendiente |
+|---|---|---|---|---|---|---|---|
+| Servicio principal | `Program.cs` | Mantiene runtime y servicios activos | `hanna-core` headless separado de CLI | ported | `src/core/hannaCore.js`, `systemd/hanna-core.service` | `npm run all:dry-run` | Ajustar ruta systemd real en HP Mini |
+| Telegram permanente | `TelegramService.cs` | Canal principal permanente | `hanna-telegram` separado, long polling, `.env`, auditoría | blocked_by_configuration | `src/integrations/telegramBot.js`, `systemd/hanna-telegram.service` | `npm run telegram:dry-run` | Requiere `TELEGRAM_BOT_TOKEN` para bot real |
+| Web compacta | Admin/WebChat C# | Páginas y chat | Web nativa sin Express con dashboard, chat, status, doctor, memoria, Obsidian, emociones, IA, Spotify, Telegram y settings | ported | `src/integrations/webCompactServer.js`, `systemd/hanna-web.service` | `npm run web -- --self-test` | UI visual avanzada pendiente |
+| Obsidian/RAG | Memoria/contexto | Vault Markdown y búsqueda | Obsidian/fallback `HannaData/vault`, frontmatter, indexado y búsqueda rg/fs | ported | `obsidianVaultService.js`, `ragSearchService.js`, `knowledgeIndexService.js` | `/obsidian estado`, `busca en obsidian prueba` | Ranking semántico avanzado depende de motor IA |
+| Preguntas generales | GeneralChat/LLM | Respuesta con contexto/LLM | General QA: RAG primero, LLM si configurado, missing_configuration si no hay motor | ported | `generalQaService.js`, `llmRouterService.js` | `busca que es un llm` | Respuesta real requiere API key u Ollama |
+| Emociones/reacciones | Persona/ResponseService | Tono y reacción | Estado emocional persistente, reacción a saludo/error/éxito | ported | `emotionStateService.js`, `reactionService.js`, `personalityRuntimeService.js`, `responseStyleService.js` | `estado emocional`, `hola` | Afinar frases con más ejemplos C# |
