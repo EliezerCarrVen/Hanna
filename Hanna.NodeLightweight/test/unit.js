@@ -35,6 +35,9 @@ const winDeps = new DependencyCheckerService({ platform: 'win32', execPath: 'C:\
 assert.strictEqual(winDeps.checkOne('node').status, 'found'); assert.strictEqual(winDeps.checkOne('npm').status, 'found'); assert.strictEqual(winDeps.checkOne('git').status, 'found'); assert.strictEqual(winDeps.checkOne('timedatectl').status, 'not_applicable');
 
 const router = new CommandRouter();
+const llmOkRouter = new CommandRouter(); let llmTimeoutUsed = false; llmOkRouter.services.llm = { generate: async (input, options) => { llmTimeoutUsed = input === '/comando_desconocido' && options.timeout === 15000; return { status: 'ok', provider: 'unit', text: 'respuesta llm unit' }; }, respondLocal: async () => 'fallback local unit' }; assert((await llmOkRouter.run('/comando_desconocido')).includes('respuesta llm unit')); assert(llmTimeoutUsed);
+const llmMissingRouter = new CommandRouter(); llmMissingRouter.services.llm = { generate: async () => ({ status: 'missing_configuration' }), respondLocal: async (input) => `fallback local ${input}` }; assert((await llmMissingRouter.run('/sin_llm')).includes('fallback local /sin_llm'));
+const llmFailRouter = new CommandRouter(); llmFailRouter.services.llm = { generate: async () => { throw new Error('llm unit failure'); }, respondLocal: async () => 'fallback tras error llm' }; assert((await llmFailRouter.run('/llm_falla')).includes('fallback tras error llm'));
 assert((await router.handle('/status')).includes('Hanna está activa'));
 assert((await router.run('/status')).includes('Hanna está activa'));
 const doctorOut = await router.run('/doctor'); assert(doctorOut.includes('Diagnóstico general')); assert(doctorOut.includes('Dependencias críticas'));

@@ -32,6 +32,7 @@ const { ObsidianVaultService } = require('../services/obsidianVaultService');
 const { KnowledgeIndexService } = require('../services/knowledgeIndexService');
 const { EmotionStateService } = require('../services/emotionStateService');
 const { ReactionService } = require('../services/reactionService');
+const { SafeLogService } = require('../services/safeLogService');
 const { VoiceService } = require('../services/voiceService');
 const { VisionService } = require('../services/visionService');
 
@@ -41,6 +42,7 @@ class CommandRouter {
     this.natural = new NaturalCommandService();
     this.conversation = new ConversationService();
     this.formatter = new ResponseFormatterService();
+    this.log = new SafeLogService();
     this.services = {
       doctor: new DoctorService(),
       selfTest: new SelfTestService(),
@@ -177,7 +179,23 @@ class CommandRouter {
     if (cmd === '/telegram' && sub === 'estado') return { status: process.env.TELEGRAM_BOT_TOKEN ? 'configured' : 'missing_configuration', service: 'telegram', always_on: 'systemd:hanna-telegram.service' };
     if (cmd === '/web' && sub === 'estado') return { status: 'configured', service: 'web', port: Number(process.env.HANNA_WEB_PORT || 8787), always_on: 'systemd:hanna-web.service' };
     if (cmd === '/salir') return { status: 'bye' };
-    return { human: await this.services.llm.respondLocal(input), data: { status: 'local_fallback', input } };
+
+    try {
+      const llmResponse = await this.services.llm.generate(input, { ...context, timeout: context.timeout || 15000 });
+      if (llmResponse && llmResponse.status === 'ok') {
+        return { human: llmResponse.text, data: { status: 'llm_answered', provider: llmResponse.provider || 'unknown' } };
+      }
+      if (llmResponse && llmResponse.status && llmResponse.status !== 'missing_configuration') {
+        this.log.write('LLM_ROUTING_STATUS', { status: llmResponse.status, provider: llmResponse.provider });
+      }
+    } catch (error) {
+      this.log.write('LLM_ROUTING_ERROR', { error: error.message });
+    }
+
+    const localFallback = this.services.llm && typeof this.services.llm.respondLocal === 'function'
+      ? await this.services.llm.respondLocal(input)
+      : `No tengo un motor IA disponible ahora mismo, pero puedo ayudarte con /help, /status, /doctor, memoria y diagnóstico local. Texto recibido: “${String(input || '').slice(0, 160)}”.`;
+    return { human: localFallback, data: { status: 'local_fallback', input } };
   }
 
   recordAudit(context, normalizedCommand, payload, result) {
