@@ -19,6 +19,11 @@ const paths = {
   vaultIndex: path.join(dataRoot, 'indexes', 'vault_index.jsonl'),
   nasIndex: path.join(dataRoot, 'indexes', 'nas_index.jsonl'),
   codeCacheIndex: path.join(dataRoot, 'indexes', 'code_cache_index.jsonl'),
+  conversacionesJsonl:      path.join(dataRoot, 'runtime', 'conversaciones.jsonl'),
+  mensajesJsonl:            path.join(dataRoot, 'runtime', 'mensajes.jsonl'),
+  transcripcionesAudioJsonl: path.join(dataRoot, 'runtime', 'transcripciones_audio.jsonl'),
+  analisisPantallaJsonl:    path.join(dataRoot, 'runtime', 'analisis_pantalla.jsonl'),
+  accionesAgenteJsonl:      path.join(dataRoot, 'runtime', 'acciones_agente.jsonl'),
   auditLog: path.join(dataRoot, 'logs', 'audit.log'),
   lightweightLog: path.join(dataRoot, 'logs', 'lightweight.log'),
   securityLog: path.join(dataRoot, 'logs', 'security.log')

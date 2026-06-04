@@ -278,7 +278,9 @@ class VoiceService {
 
     fs.writeFileSync(wavPath, audio.buffer);
 
-    const play = await this.runAsync('aplay', [wavPath], { timeout: 30000 });
+    const alsaDevice = process.env.HANNA_ALSA_DEVICE;
+    const aplayArgs = alsaDevice ? ['-D', alsaDevice, wavPath] : [wavPath];
+    const play = await this.runAsync('aplay', aplayArgs, { timeout: 30000 });
 
     try {
       fs.unlinkSync(wavPath);
@@ -311,7 +313,9 @@ class VoiceService {
       };
     }
 
-    const play = await this.runAsync('aplay', [wavPath], { timeout: 30000 });
+    const alsaDevice = process.env.HANNA_ALSA_DEVICE;
+    const aplayArgs = alsaDevice ? ['-D', alsaDevice, wavPath] : [wavPath];
+    const play = await this.runAsync('aplay', aplayArgs, { timeout: 30000 });
 
     try { fs.unlinkSync(txtPath); } catch {}
     try { fs.unlinkSync(wavPath); } catch {}

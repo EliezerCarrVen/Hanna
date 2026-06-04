@@ -34,6 +34,8 @@ const { EmotionStateService } = require('../services/emotionStateService');
 const { ReactionService } = require('../services/reactionService');
 const { VoiceService } = require('../services/voiceService');
 const { VisionService } = require('../services/visionService');
+const { StorageMappingService } = require('../services/storageMappingService');
+const { RemoteSyncService } = require('../services/remoteSyncService');
 
 class CommandRouter {
   constructor() {
@@ -71,7 +73,9 @@ class CommandRouter {
       emotions: new EmotionStateService(),
       reactions: new ReactionService(),
       voice: new VoiceService(),
-      vision: new VisionService()
+      vision: new VisionService(),
+      storage: new StorageMappingService(),
+      sync: new RemoteSyncService()
     };
   }
 
@@ -183,6 +187,31 @@ class CommandRouter {
     if (cmd === '/nodered' && sub === 'estado') return this.services.nodeRed.status();
     if (cmd === '/nodered' && sub === 'ping') return await this.services.nodeRed.ping();
     if (cmd === '/serverless' && sub === 'estado') return this.services.serverless.status();
+    if (cmd === '/db' && sub === 'estado') return this.services.storage.status();
+    if (cmd === '/db' && sub === 'guardar') {
+      const collection = rest[0];
+      if (!collection) return { status: 'error', message: 'Uso: /db guardar <coleccion> <texto>' };
+      const raw = rest.slice(1).join(' ');
+      let payload;
+      try { payload = JSON.parse(raw); } catch { payload = { texto: raw }; }
+      payload.actor = context.username || context.actor || 'local-root';
+      return this.services.storage.write(collection, payload);
+    }
+    if (cmd === '/db' && sub === 'leer') {
+      const collection = rest[0];
+      if (!collection) return { status: 'error', message: 'Uso: /db leer <coleccion> [limite]' };
+      return this.services.storage.read(collection, rest[1] || '');
+    }
+    if (cmd === '/sync' && sub === 'estado') return this.services.sync.status();
+    if (cmd === '/sync' && sub === 'enviar') {
+      const collection = rest[0];
+      if (!collection) return { status: 'error', message: 'Uso: /sync enviar <coleccion> <datos>' };
+      const raw = rest.slice(1).join(' ');
+      let payload;
+      try { payload = JSON.parse(raw); } catch { payload = { texto: raw }; }
+      payload.origen = context.source || 'cli';
+      return await this.services.sync.syncPayload(collection, payload);
+    }
     if (cmd === '/sistema' && sub === 'doctor') return this.services.diagnostics.diagnose();
     if (cmd === '/ntp' && sub === 'estado') return { ntp: this.services.diagnostics.diagnose().ntp };
     if (cmd === '/ip' && sub === 'estado') return { ip_local: this.services.diagnostics.ipLocal() };
