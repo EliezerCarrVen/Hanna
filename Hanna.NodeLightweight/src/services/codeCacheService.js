@@ -1,0 +1,3 @@
+const { paths } = require('../core/paths'); const { MarkdownVaultService } = require('./markdownVaultService');
+class CodeCacheService { constructor() { this.vault = new MarkdownVaultService(); } prueba() { return this.vault.createNote('codigo_cache', 'codigo-prueba', 'Fragmento de prueba para Hanna.NodeLightweight'); } buscar(q) { return this.vault.search(q).filter(x => JSON.stringify(x).includes('codigo_cache') || JSON.stringify(x).toLowerCase().includes(String(q).toLowerCase())); } listar() { return this.vault.list('codigo_cache'); } estado() { return { path: paths.vaultDirs.codigo_cache, items: this.listar().length }; } }
+module.exports = { CodeCacheService };

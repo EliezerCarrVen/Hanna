@@ -1,0 +1,16 @@
+[Unit]
+Description=Hanna NodeLightweight Compact Web
+After=network-online.target hanna-core.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/hanna/Hanna.NodeLightweight
+Environment=HANNA_WEB_PORT=8787
+ExecStart=/usr/bin/npm run web
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
