@@ -225,7 +225,16 @@ class CommandRouter {
     if (cmd === '/telegram' && sub === 'estado') return { status: process.env.TELEGRAM_BOT_TOKEN ? 'configured' : 'missing_configuration', service: 'telegram', always_on: 'systemd:hanna-telegram.service' };
     if (cmd === '/web' && sub === 'estado') return { status: 'configured', service: 'web', port: Number(process.env.HANNA_WEB_PORT || 8787), always_on: 'systemd:hanna-web.service' };
     if (cmd === '/salir') return { status: 'bye' };
-    return { human: await this.services.llm.respondLocal(input), data: { status: 'local_fallback', input } };
+
+    const llmResult = await this.services.llm.generate(input, context);
+    return {
+      human: llmResult.text,
+      data: {
+        status: llmResult.status,
+        provider: llmResult.provider,
+        input
+      }
+    };
   }
 
 
