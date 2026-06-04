@@ -85,6 +85,21 @@ class CommandRouter {
     const normalized = this.natural.normalize(input);
     const normalizedCommand = normalized.normalizedCommand || normalized.command || input;
     const execContext = { ...context, mode, originalInput, normalizedCommand };
+    const directVoiceAlias = this.detectVoiceChange(input);
+    if (directVoiceAlias) {
+      const command = `/voz cambiar ${directVoiceAlias}`;
+      const payload = await this.executeCommand(command, execContext);
+      this.recordAudit(execContext, command, payload, 'ok');
+
+      if (mode === 'json') {
+        return this.formatter.format({ command, data: payload }, { mode: 'json' });
+      }
+
+      return this.formatter.format(
+        { command, data: payload, human: payload && payload.human },
+        { ...execContext, mode: 'human' }
+      );
+    }
 
     try {
       let payload;
@@ -101,6 +116,8 @@ class CommandRouter {
   }
 
   async executeCommand(input, context = {}) {
+    const requestedVoiceAlias = this.detectVoiceChange(input);
+    if (requestedVoiceAlias) return this.services.voice.setVoice(requestedVoiceAlias);
     const [cmd, sub, ...rest] = String(input || '').trim().split(' ');
     const text = rest.join(' ');
     if (cmd === '/help' || cmd === '/h' || cmd === '/ayuda') return { commands };
@@ -150,6 +167,8 @@ class CommandRouter {
     if (cmd === '/spotify' && sub === 'siguiente') return await this.services.spotify.next();
     if (cmd === '/spotify' && sub === 'anterior') return await this.services.spotify.previous();
     if (cmd === '/voz' && (sub === 'estado' || !sub)) return this.services.voice.status();
+    if (cmd === '/voz' && (sub === 'voces' || sub === 'listar')) return this.services.voice.listVoices();
+    if (cmd === '/voz' && (sub === 'cambiar' || sub === 'voz' || sub === 'usar')) return this.services.voice.setVoice(text || rest[0] || '');
     if (cmd === '/voz' && (sub === 'decir' || sub === 'hablar')) return await this.services.voice.speak(text);
     if (cmd === '/escuchar') { const duration = Number(sub) || 5; const outputPath = Number(sub) ? text : [sub, ...rest].filter(Boolean).join(' '); return await this.services.voice.record(duration, outputPath || undefined); }
     if (cmd === '/pantalla' && sub === 'estado') return this.services.vision.status();
@@ -178,6 +197,31 @@ class CommandRouter {
     if (cmd === '/web' && sub === 'estado') return { status: 'configured', service: 'web', port: Number(process.env.HANNA_WEB_PORT || 8787), always_on: 'systemd:hanna-web.service' };
     if (cmd === '/salir') return { status: 'bye' };
     return { human: await this.services.llm.respondLocal(input), data: { status: 'local_fallback', input } };
+  }
+
+
+  detectVoiceChange(input) {
+    const normalized = String(input || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+
+    const voices = ['estrella', 'karla', 'dalia', 'camila', 'tania'];
+
+    const hasTrigger = [
+      'cambia la voz',
+      'cambiar la voz',
+      'usa la voz',
+      'usar la voz',
+      'pon la voz',
+      'ponme la voz',
+      'voz a',
+      'voz de'
+    ].some(trigger => normalized.includes(trigger));
+
+    if (!hasTrigger) return null;
+
+    return voices.find(voice => normalized.includes(voice)) || null;
   }
 
   recordAudit(context, normalizedCommand, payload, result) {
